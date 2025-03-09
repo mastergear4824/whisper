@@ -8,36 +8,36 @@
 
 ### 한국어
 
-이 프로젝트는 OpenAI의 Whisper 모델을 활용한 음성 인식 웹 애플리케이션입니다. 사용자가 오디오 파일을 업로드하면 자동으로 텍스트로 변환하고, 결과를 세그먼트 단위로 표시합니다. 다국어 지원(한국어, 영어, 일본어, 중국어 등)과 함께 사용자 인터페이스도 다양한 언어(한국어, 영어, 일본어)로 제공됩니다.
+이 프로젝트는 OpenAI의 Whisper 모델을 활용한 음성 인식 웹 애플리케이션입니다. 사용자가 오디오 파일을 업로드하면 자동으로 텍스트로 변환하고, 결과를 세그먼트 단위로 표시합니다. 다국어 지원(영어, 한국어, 일본어)과 함께 사용자 인터페이스도 다양한 언어(한국어, 영어, 일본어)로 제공됩니다.
 
 주요 기능:
 
 - 다양한 오디오 파일 형식 지원 (mp3, wav, ogg, m4a, flac)
-- 자동 언어 감지 및 다국어 음성 인식
+- 다국어 음성 인식
 - 세그먼트 단위 텍스트 편집 및 저장
 - 이전 변환 기록 저장 및 관리
 - 다국어 사용자 인터페이스
 
 ### English
 
-This project is a web application for speech recognition using OpenAI's Whisper model. When users upload audio files, the system automatically converts them to text and displays the results in segments. It supports multiple languages for transcription (Korean, English, Japanese, Chinese, etc.) and provides a user interface in various languages (Korean, English, Japanese).
+This project is a web application for speech recognition using OpenAI's Whisper model. When users upload audio files, the system automatically converts them to text and displays the results in segments. It supports multiple languages for transcription (English, Korean, Japanese) and provides a user interface in various languages (Korean, English, Japanese).
 
 Key Features:
 
 - Support for various audio file formats (mp3, wav, ogg, m4a, flac)
-- Automatic language detection and multilingual speech recognition
+- multilingual speech recognition
 - Segment-level text editing and saving
 - Storage and management of previous conversion records
 - Multilingual user interface
 
 ### 日本語
 
-このプロジェクトは、OpenAI の Whisper モデルを活用した音声認識ウェブアプリケーションです。ユーザーがオーディオファイルをアップロードすると、自動的にテキストに変換し、結果をセグメント単位で表示します。多言語対応（韓国語、英語、日本語、中国語など）とともに、ユーザーインターフェースも様々な言語（韓国語、英語、日本語）で提供されます。
+このプロジェクトは、OpenAI の Whisper モデルを活用した音声認識ウェブアプリケーションです。ユーザーがオーディオファイルをアップロードすると、自動的にテキストに変換し、結果をセグメント単位で表示します。多言語対応（英語、韓国語、日本語）とともに、ユーザーインターフェースも様々な言語（韓国語、英語、日本語）で提供されます。
 
 主な機能：
 
 - 様々なオーディオファイル形式のサポート（mp3、wav、ogg、m4a、flac）
-- 自動言語検出と多言語音声認識
+- 多言語音声認識
 - セグメント単位のテキスト編集と保存
 - 過去の変換履歴の保存と管理
 - 多言語ユーザーインターフェース
@@ -268,35 +268,34 @@ python app.py
 ### 한국어
 
 1. 웹 브라우저에서 애플리케이션에 접속합니다.
-2. 오디오 파일을 업로드 영역에 드래그 앤 드롭하거나 파일 선택 버튼을 클릭하여 선택합니다.
-3. 인식할 언어를 선택하거나 '자동 감지'를 선택합니다.
-4. '변환 시작' 버튼을 클릭하여 음성 인식을 시작합니다.
-5. 변환이 완료되면 결과가 세그먼트 단위로 표시됩니다.
-6. 필요한 경우 텍스트를 편집하고 저장할 수 있습니다.
-7. 이전 변환 기록은 메인 페이지에서 확인할 수 있습니다.
+2. 인식할 언어를 선택합니다.
+3. 오디오 파일을 업로드 영역에 드래그 앤 드롭하거나 파일 선택 버튼을 클릭하여 선택하여 음성 인식을 시작합니다.
+4. 변환이 완료되면 결과가 세그먼트 단위로 표시됩니다.
+5. 필요한 경우 텍스트를 편집하고 저장할 수 있습니다.
+6. 이전 변환 기록은 메인 페이지에서 확인할 수 있습니다.
 
 ### English
 
-1. Access the application in your web browser.
-2. Drag and drop an audio file to the upload area or click the file selection button.
-3. Select the language for recognition or choose 'Auto Detect'.
-4. Click the 'Start Conversion' button to begin speech recognition.
-5. Once the conversion is complete, the results will be displayed in segments.
-6. You can edit and save the text if needed.
-7. Previous conversion records can be viewed on the main page.
+1. Access the application through your web browser.
+2. Select the language for recognition.
+3. Start speech recognition by dragging and dropping an audio file to the upload area or clicking the file selection button.
+4. Once the conversion is complete, results will be displayed in segments.
+5. You can edit and save the text if needed.
+6. Previous conversion records can be viewed on the main page.
 
 ### 日本語
 
 1. ウェブブラウザでアプリケーションにアクセスします。
-2. オーディオファイルをアップロードエリアにドラッグ＆ドロップするか、ファイル選択ボタンをクリックして選択します。
-3. 認識する言語を選択するか、「自動検出」を選択します。
-4. 「変換開始」ボタンをクリックして音声認識を開始します。
-5. 変換が完了すると、結果がセグメント単位で表示されます。
-6. 必要に応じてテキストを編集して保存できます。
-7. 過去の変換履歴はメインページで確認できます。
+2. 認識する言語を選択します。
+3. オーディオファイルをアップロードエリアにドラッグ＆ドロップするか、ファイル選択ボタンをクリックして選択し、音声認識を開始します。
+4. 変換が完了すると、結果がセグメント単位で表示されます。
+5. 必要に応じてテキストを編集して保存できます。
+6. 過去の変換履歴はメインページで確認できます。
 
 ## 라이센스 (License / ライセンス)
 
 이 프로젝트는 MIT 라이센스 하에 배포됩니다. 자세한 내용은 LICENSE 파일을 참조하세요.
+
 This project is distributed under the MIT License. See the LICENSE file for more details.
+
 このプロジェクトは MIT ライセンスの下で配布されています。詳細は LICENSE ファイルを参照してください。

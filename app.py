@@ -24,12 +24,10 @@ app.secret_key = 'whisper_secret_key'  # 세션을 위한 시크릿 키
 
 # 지원하는 언어 목록 (Whisper 모델용)
 SUPPORTED_LANGUAGES = {
-    'auto': _('자동 감지'),
-    'en': _('영어'),
-    'ko': _('한국어'),
-    'ja': _('일본어'),
-    'zh': _('중국어'),
-    'multilingual': _('다국어')
+    'en': 'English',
+    'ko': '한국어',
+    'ja': '日本語',
+    'multilingual': 'Multilingual'
 }
 
 # 지원하는 UI 언어 목록
@@ -42,6 +40,12 @@ UI_LANGUAGES = {
 # Babel 설정
 app.config['BABEL_DEFAULT_LOCALE'] = 'ko'
 app.config['BABEL_TRANSLATION_DIRECTORIES'] = 'translations'
+
+# favicon 설정
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(os.path.join(app.root_path, 'static', 'img'),
+                               'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 def get_locale():
     # 사용자가 선택한 언어가 있으면 해당 언어 사용

@@ -17,10 +17,6 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.17.0\n"
 
-#: app.py:27
-msgid "자동 감지"
-msgstr ""
-
 #: app.py:28
 msgid "영어"
 msgstr ""
