@@ -9,7 +9,8 @@ import torch
 import numpy as np
 import duckdb
 import datetime
-from flask import Flask, render_template, request, jsonify, redirect, url_for, send_from_directory
+from flask import Flask, render_template, request, jsonify, redirect, url_for, send_from_directory, session, g
+from flask_babel import Babel, gettext as _, get_locale
 from werkzeug.utils import secure_filename
 from werkzeug.exceptions import RequestEntityTooLarge
 
@@ -19,16 +20,37 @@ app.config['UPLOAD_FOLDER'] = 'static/uploads'
 app.config['ALLOWED_EXTENSIONS'] = {'mp3', 'wav', 'ogg', 'm4a', 'flac'}
 # 용량 제한 해제 (로컬 애플리케이션용)
 # app.config['MAX_CONTENT_LENGTH'] = 60 * 1024 * 1024  # 60MB 최대 파일 크기 (50MB 파일 + 여유 공간)
+app.secret_key = 'whisper_secret_key'  # 세션을 위한 시크릿 키
 
-# 지원하는 언어 목록
+# 지원하는 언어 목록 (Whisper 모델용)
 SUPPORTED_LANGUAGES = {
-    'auto': '자동 감지',
-    'en': '영어',
-    'ko': '한국어',
-    'ja': '일본어',
-    'zh': '중국어',
-    'multilingual': '다국어'
+    'auto': _('자동 감지'),
+    'en': _('영어'),
+    'ko': _('한국어'),
+    'ja': _('일본어'),
+    'zh': _('중국어'),
+    'multilingual': _('다국어')
 }
+
+# 지원하는 UI 언어 목록
+UI_LANGUAGES = {
+    'ko': '한국어',
+    'ja': '日本語',
+    'en': 'English'
+}
+
+# Babel 설정
+app.config['BABEL_DEFAULT_LOCALE'] = 'ko'
+app.config['BABEL_TRANSLATION_DIRECTORIES'] = 'translations'
+
+def get_locale():
+    # 사용자가 선택한 언어가 있으면 해당 언어 사용
+    if 'language' in session:
+        return session['language']
+    # 없으면 요청 헤더의 Accept-Language를 기반으로 언어 선택
+    return request.accept_languages.best_match(UI_LANGUAGES.keys())
+
+babel = Babel(app, locale_selector=get_locale)
 
 # 업로드 폴더가 없으면 생성
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
@@ -225,7 +247,7 @@ def get_session(session_id):
 def optimized_transcribe(model, audio_path, task_id, language='auto'):
     try:
         # 처리 시작 상태 업데이트
-        update_task_status(task_id, "시작됨", 0)
+        update_task_status(task_id, _("시작됨"), 0)
         
         # 메모리 사용량을 줄이기 위한 설정
         options = {
@@ -239,25 +261,25 @@ def optimized_transcribe(model, audio_path, task_id, language='auto'):
             options["language"] = language
         
         # 음성 로드 중 상태 업데이트
-        update_task_status(task_id, "오디오 로드 중", 10)
+        update_task_status(task_id, _("오디오 로드 중"), 10)
         time.sleep(0.5)  # 상태 업데이트가 보이도록 약간의 지연
         
         # 음성 분석 준비
-        update_task_status(task_id, "음성 분석 준비 중", 20)
+        update_task_status(task_id, _("음성 분석 준비 중"), 20)
         time.sleep(0.5)
         
         # 음성을 텍스트로 변환 (진행 상황 업데이트를 위한 콜백 추가)
-        update_task_status(task_id, "음성 분석 중", 30)
+        update_task_status(task_id, _("음성 분석 중"), 30)
         
         # 실제 변환 작업 수행
         result = model.transcribe(audio_path, **options)
         
         # 변환 완료 후 상태 업데이트
-        update_task_status(task_id, "변환 완료", 70)
+        update_task_status(task_id, _("변환 완료"), 70)
         time.sleep(0.5)
         
         # 텍스트 후처리
-        update_task_status(task_id, "텍스트 후처리 중", 90)
+        update_task_status(task_id, _("텍스트 후처리 중"), 90)
         processed_text = process_text_with_line_breaks(result["text"])
         result["text"] = processed_text
         
@@ -265,7 +287,7 @@ def optimized_transcribe(model, audio_path, task_id, language='auto'):
         processing_tasks[task_id]["segments"] = extract_segments(result)
         
         # 처리 완료 상태 업데이트
-        update_task_status(task_id, "처리 완료", 100)
+        update_task_status(task_id, _("처리 완료"), 100)
         
         # 메모리 정리
         gc.collect()
@@ -273,7 +295,7 @@ def optimized_transcribe(model, audio_path, task_id, language='auto'):
         return result
     except Exception as e:
         # 오류 발생 시 상태 업데이트
-        update_task_status(task_id, f"오류 발생: {str(e)}", -1)
+        update_task_status(task_id, _("오류 발생: {}").format(str(e)), -1)
         raise e
 
 # 세그먼트 추출 함수
@@ -354,7 +376,7 @@ def update_task_status(task_id, status, progress):
 @app.errorhandler(RequestEntityTooLarge)
 def handle_file_too_large(e):
     return jsonify({
-        'error': '파일 크기가 너무 큽니다.',
+        'error': _('파일 크기가 너무 큽니다.'),
         'code': 'FILE_TOO_LARGE'
     }), 413
 
@@ -363,27 +385,34 @@ def handle_file_too_large(e):
 def handle_exception(e):
     # 디버그 모드에서도 항상 JSON 응답 반환
     app.logger.error(f"Unhandled exception: {str(e)}")
-    return jsonify({'error': f'서버 오류가 발생했습니다: {str(e)}'}), 500
+    return jsonify({'error': _('서버 오류가 발생했습니다: {}').format(str(e))}), 500
+
+# 언어 변경 라우트
+@app.route('/set_language/<language>')
+def set_language(language):
+    if language in UI_LANGUAGES:
+        session['language'] = language
+    return redirect(request.referrer or url_for('index'))
 
 @app.route('/')
 def index():
     try:
         # 최근 세션 목록 조회
         sessions = get_sessions(limit=5) if db_initialized else []
-        return render_template('index.html', languages=SUPPORTED_LANGUAGES, sessions=sessions)
+        return render_template('index.html', languages=SUPPORTED_LANGUAGES, ui_languages=UI_LANGUAGES, sessions=sessions)
     except Exception as e:
         app.logger.error(f"Error in index route: {str(e)}")
-        return render_template('index.html', languages=SUPPORTED_LANGUAGES, sessions=[])
+        return render_template('index.html', languages=SUPPORTED_LANGUAGES, ui_languages=UI_LANGUAGES, sessions=[])
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
     if 'file' not in request.files:
-        return jsonify({'error': '파일이 없습니다'}), 400
+        return jsonify({'error': _('파일이 없습니다')}), 400
     
     file = request.files['file']
     
     if file.filename == '':
-        return jsonify({'error': '선택된 파일이 없습니다'}), 400
+        return jsonify({'error': _('선택된 파일이 없습니다')}), 400
     
     # 언어 설정 확인
     language = request.form.get('language', 'auto')
@@ -409,7 +438,7 @@ def upload_file():
             processing_tasks[task_id] = {
                 "filename": unique_filename,
                 "original_filename": original_filename,
-                "status": "대기 중",
+                "status": _("대기 중"),
                 "progress": 0,
                 "completed": False,
                 "result": None,
@@ -425,16 +454,16 @@ def upload_file():
             
             return jsonify({
                 'success': True,
-                'message': '파일 처리가 시작되었습니다',
+                'message': _('파일 처리가 시작되었습니다'),
                 'task_id': task_id
             })
         except Exception as e:
             # 오류 발생 시 파일 삭제
             if os.path.exists(filepath):
                 os.remove(filepath)
-            return jsonify({'error': f'처리 중 오류가 발생했습니다: {str(e)}'}), 500
+            return jsonify({'error': _('처리 중 오류가 발생했습니다: {}').format(str(e))}), 500
     
-    return jsonify({'error': '허용되지 않는 파일 형식입니다'}), 400
+    return jsonify({'error': _('허용되지 않는 파일 형식입니다')}), 400
 
 @app.route('/status/<task_id>', methods=['GET'])
 def get_task_status(task_id):
@@ -448,7 +477,7 @@ def get_task_status(task_id):
                         'completed': True,
                         'success': True,
                         'transcription': session['result'],
-                        'status': '처리 완료',
+                        'status': _('처리 완료'),
                         'progress': 100,
                         'segments': session['segments'],
                         'audio_path': session['audio_path']
@@ -456,7 +485,7 @@ def get_task_status(task_id):
         except Exception as e:
             app.logger.error(f"Error retrieving session {task_id}: {str(e)}")
         
-        return jsonify({'error': '존재하지 않는 작업입니다'}), 404
+        return jsonify({'error': _('존재하지 않는 작업입니다')}), 404
     
     task = processing_tasks[task_id]
     
@@ -504,7 +533,7 @@ def get_task_status(task_id):
 def get_session_api(session_id):
     try:
         if not db_initialized:
-            return jsonify({'error': '데이터베이스가 초기화되지 않았습니다'}), 500
+            return jsonify({'error': _('데이터베이스가 초기화되지 않았습니다')}), 500
             
         session = get_session(session_id)
         if session:
@@ -512,17 +541,17 @@ def get_session_api(session_id):
                 'success': True,
                 'session': session
             })
-        return jsonify({'error': '존재하지 않는 세션입니다'}), 404
+        return jsonify({'error': _('존재하지 않는 세션입니다')}), 404
     except Exception as e:
         app.logger.error(f"Error in get_session_api: {str(e)}")
-        return jsonify({'error': f'세션 조회 중 오류가 발생했습니다: {str(e)}'}), 500
+        return jsonify({'error': _('세션 조회 중 오류가 발생했습니다: {}').format(str(e))}), 500
 
 # 세션 목록 조회 API
 @app.route('/sessions', methods=['GET'])
 def get_sessions_api():
     try:
         if not db_initialized:
-            return jsonify({'error': '데이터베이스가 초기화되지 않았습니다'}), 500
+            return jsonify({'error': _('데이터베이스가 초기화되지 않았습니다')}), 500
             
         limit = request.args.get('limit', 10, type=int)
         sessions = get_sessions(limit=limit)
@@ -532,7 +561,7 @@ def get_sessions_api():
         })
     except Exception as e:
         app.logger.error(f"Error in get_sessions_api: {str(e)}")
-        return jsonify({'error': f'세션 목록 조회 중 오류가 발생했습니다: {str(e)}'}), 500
+        return jsonify({'error': _('세션 목록 조회 중 오류가 발생했습니다: {}').format(str(e))}), 500
 
 # 오래된 작업 정리 (선택적)
 def cleanup_old_tasks():

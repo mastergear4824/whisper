@@ -1,0 +1,268 @@
+# Japanese translations for PROJECT.
+# Copyright (C) 2025 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2025-03-09 18:22+0900\n"
+"PO-Revision-Date: 2025-03-09 18:22+0900\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: ja\n"
+"Language-Team: ja <LL@li.org>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+#: app.py:27
+msgid "자동 감지"
+msgstr "自動検出"
+
+#: app.py:28
+msgid "영어"
+msgstr "英語"
+
+#: app.py:29
+msgid "한국어"
+msgstr "韓国語"
+
+#: app.py:30
+msgid "일본어"
+msgstr "日本語"
+
+#: app.py:31
+msgid "중국어"
+msgstr "中国語"
+
+#: app.py:32
+msgid "다국어"
+msgstr "多言語"
+
+#: app.py:250
+msgid "시작됨"
+msgstr "開始しました"
+
+#: app.py:264
+msgid "오디오 로드 중"
+msgstr "オーディオ読み込み中"
+
+#: app.py:268
+msgid "음성 분석 준비 중"
+msgstr "音声分析準備中"
+
+#: app.py:272
+msgid "음성 분석 중"
+msgstr "音声分析中"
+
+#: app.py:278
+msgid "변환 완료"
+msgstr "変換完了"
+
+#: app.py:282
+msgid "텍스트 후처리 중"
+msgstr "テキスト後処理中"
+
+#: app.py:290 app.py:480
+msgid "처리 완료"
+msgstr "処理完了"
+
+#: app.py:298
+#, python-brace-format
+msgid "오류 발생: {}"
+msgstr "エラー発生: {}"
+
+#: app.py:379
+msgid "파일 크기가 너무 큽니다."
+msgstr "ファイルサイズが大きすぎます。"
+
+#: app.py:388
+#, python-brace-format
+msgid "서버 오류가 발생했습니다: {}"
+msgstr "サーバーエラーが発生しました: {}"
+
+#: app.py:410
+msgid "파일이 없습니다"
+msgstr "ファイルがありません"
+
+#: app.py:415
+msgid "선택된 파일이 없습니다"
+msgstr "選択されたファイルがありません"
+
+#: app.py:441
+msgid "대기 중"
+msgstr "待機中"
+
+#: app.py:457
+msgid "파일 처리가 시작되었습니다"
+msgstr "ファイル処理が開始されました"
+
+#: app.py:464
+#, python-brace-format
+msgid "처리 중 오류가 발생했습니다: {}"
+msgstr "処理中にエラーが発生しました: {}"
+
+#: app.py:466
+msgid "허용되지 않는 파일 형식입니다"
+msgstr "許可されていないファイル形式です"
+
+#: app.py:488
+msgid "존재하지 않는 작업입니다"
+msgstr "存在しないタスクです"
+
+#: app.py:536 app.py:554
+msgid "데이터베이스가 초기화되지 않았습니다"
+msgstr "データベースが初期化されていません"
+
+#: app.py:544
+msgid "존재하지 않는 세션입니다"
+msgstr "存在しないセッションです"
+
+#: app.py:547
+#, python-brace-format
+msgid "세션 조회 중 오류가 발생했습니다: {}"
+msgstr "セッション照会中にエラーが発生しました: {}"
+
+#: app.py:564
+#, python-brace-format
+msgid "세션 목록 조회 중 오류가 발생했습니다: {}"
+msgstr "セッションリスト照会中にエラーが発生しました: {}"
+
+#: templates/index.html:6 templates/index.html:212
+msgid "Whisper 음성-텍스트 변환기"
+msgstr "Whisper 音声テキスト変換ツール"
+
+#: templates/index.html:227
+msgid "새 변환"
+msgstr "新規変換"
+
+#: templates/index.html:241
+msgid "이전 기록"
+msgstr "履歴"
+
+#: templates/index.html:257
+msgid "음성 파일 업로드"
+msgstr "音声ファイルのアップロード"
+
+#: templates/index.html:259
+msgid ""
+"MP3, WAV, OGG, M4A, FLAC 형식의 오디오 파일을\n"
+"                업로드하세요."
+msgstr "MP3、WAV、OGG、M4A、FLAC形式のオーディオファイルをアップロードしてください。"
+
+#: templates/index.html:263
+msgid ""
+"선택한 언어로 음성을\n"
+"                텍스트로 변환합니다. 문장 사이에 자동으로 행 바꿈이\n"
+"                추가됩니다."
+msgstr "選択した言語で音声をテキストに変換します。文章の間に自動的に改行が追加されます。"
+
+#: templates/index.html:270
+msgid "언어 선택:"
+msgstr "言語選択:"
+
+#: templates/index.html:283
+msgid "파일을 여기에 끌어다 놓거나 클릭하여 선택하세요"
+msgstr "ファイルをここにドラッグ＆ドロップするか、クリックして選択してください"
+
+#: templates/index.html:286
+msgid "파일 선택"
+msgstr "ファイル選択"
+
+#: templates/index.html:299
+msgid "로딩 중..."
+msgstr "読み込み中..."
+
+#: templates/index.html:302 templates/index.html:556
+msgid "음성을 텍스트로 변환 중입니다. 잠시만 기다려주세요..."
+msgstr "音声をテキストに変換中です。少々お待ちください..."
+
+#: templates/index.html:334
+msgid "이전 변환 기록"
+msgstr "変換履歴"
+
+#: templates/index.html:336
+msgid ""
+"이전에 변환한 파일 목록입니다. 클릭하여 결과를 확인할 수\n"
+"                있습니다."
+msgstr "以前に変換したファイルのリストです。クリックして結果を確認できます。"
+
+#: templates/index.html:364
+msgid "아직 변환 기록이 없습니다. 새 파일을 변환해보세요."
+msgstr "まだ変換履歴がありません。新しいファイルを変換してみてください。"
+
+#: templates/index.html:376
+msgid "변환 결과"
+msgstr "変換結果"
+
+#: templates/index.html:378
+msgid "복사"
+msgstr "コピー"
+
+#: templates/index.html:390
+msgid "브라우저가 오디오 재생을 지원하지 않습니다."
+msgstr "ブラウザがオーディオ再生をサポートしていません。"
+
+#: templates/index.html:465 templates/index.html:581 templates/index.html:639
+msgid "오류:"
+msgstr "エラー:"
+
+#: templates/index.html:465
+msgid "세션을 불러올 수 없습니다."
+msgstr "セッションを読み込めません。"
+
+#: templates/index.html:470
+msgid "세션 로드 중 오류가 발생했습니다:"
+msgstr "セッション読み込み中にエラーが発生しました:"
+
+#: templates/index.html:548
+msgid "준비 중..."
+msgstr "準備中..."
+
+#: templates/index.html:549
+msgid "경과 시간: 0분 0초"
+msgstr "経過時間: 0分 0秒"
+
+#: templates/index.html:553
+msgid "대용량 파일 처리 중입니다. 파일 크기에 따라 몇 분이 소요될 수 있습니다..."
+msgstr "大容量ファイルを処理中です。ファイルサイズによっては数分かかる場合があります..."
+
+#: templates/index.html:565
+msgid "서버 오류:"
+msgstr "サーバーエラー:"
+
+#: templates/index.html:572
+msgid "서버가 JSON이 아닌 응답을 반환했습니다"
+msgstr "サーバーがJSONではない応答を返しました"
+
+#: templates/index.html:586
+msgid "업로드 중 오류가 발생했습니다:"
+msgstr "アップロード中にエラーが発生しました:"
+
+#: templates/index.html:644
+msgid "상태 확인 중 오류:"
+msgstr "状態確認中にエラー:"
+
+#: templates/index.html:653
+msgid "처리 중..."
+msgstr "処理中..."
+
+#: templates/index.html:659
+msgid "경과 시간:"
+msgstr "経過時間:"
+
+#: templates/index.html:659
+msgid "분"
+msgstr "分"
+
+#: templates/index.html:659
+msgid "초"
+msgstr "秒"
+
+#: templates/index.html:682
+msgid "복사됨"
+msgstr "コピーしました"
+

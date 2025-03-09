@@ -1,3 +1,5 @@
+[Mastergear's Toy Project]
+
 # Whisper 음성-텍스트 변환기
 
 OpenAI의 Whisper 모델을 사용하여 음성 파일을 텍스트로 변환하는 웹 애플리케이션입니다.
