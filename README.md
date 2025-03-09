@@ -1,478 +1,302 @@
-[Mastergear's Toy Project]
+# Whisper 음성 인식 웹 애플리케이션
 
-# Whisper 음성-텍스트 변환기 | 音声テキスト変換ツール | Speech-to-Text Converter
+# Whisper Speech Recognition Web Application
 
-<div align="center">
-  <h3>🌏 언어 선택 | 言語選択 | Language Selection</h3>
-  <a href="#한국어">한국어</a> |
-  <a href="#日本語">日本語</a> |
-  <a href="#english">English</a>
-</div>
+# Whisper 音声認識ウェブアプリケーション
 
----
+## 소개 (Introduction / 紹介)
 
-<a id="한국어"></a>
+### 한국어
 
-## 🇰🇷 한국어
+이 프로젝트는 OpenAI의 Whisper 모델을 활용한 음성 인식 웹 애플리케이션입니다. 사용자가 오디오 파일을 업로드하면 자동으로 텍스트로 변환하고, 결과를 세그먼트 단위로 표시합니다. 다국어 지원(한국어, 영어, 일본어, 중국어 등)과 함께 사용자 인터페이스도 다양한 언어(한국어, 영어, 일본어)로 제공됩니다.
 
-OpenAI의 Whisper 모델을 사용하여 음성 파일을 텍스트로 변환하는 웹 애플리케이션입니다.
+주요 기능:
 
-### 주요 기능
+- 다양한 오디오 파일 형식 지원 (mp3, wav, ogg, m4a, flac)
+- 자동 언어 감지 및 다국어 음성 인식
+- 세그먼트 단위 텍스트 편집 및 저장
+- 이전 변환 기록 저장 및 관리
+- 다국어 사용자 인터페이스
 
-- 다양한 오디오 파일 형식 지원 (MP3, WAV, OGG, M4A, FLAC)
-- 드래그 앤 드롭 파일 업로드
-- 변환된 텍스트 복사 기능
-- 반응형 디자인
-- 화자 구분 기능 (다중 화자 대화 구분)
-- 오디오 재생과 텍스트 동기화 (하이라이트 및 자동 스크롤)
-- 다국어 UI 지원 (한국어, 일본어, 영어)
+### English
 
-### 설치 방법
+This project is a web application for speech recognition using OpenAI's Whisper model. When users upload audio files, the system automatically converts them to text and displays the results in segments. It supports multiple languages for transcription (Korean, English, Japanese, Chinese, etc.) and provides a user interface in various languages (Korean, English, Japanese).
 
-1. 저장소 클론
+Key Features:
+
+- Support for various audio file formats (mp3, wav, ogg, m4a, flac)
+- Automatic language detection and multilingual speech recognition
+- Segment-level text editing and saving
+- Storage and management of previous conversion records
+- Multilingual user interface
+
+### 日本語
+
+このプロジェクトは、OpenAI の Whisper モデルを活用した音声認識ウェブアプリケーションです。ユーザーがオーディオファイルをアップロードすると、自動的にテキストに変換し、結果をセグメント単位で表示します。多言語対応（韓国語、英語、日本語、中国語など）とともに、ユーザーインターフェースも様々な言語（韓国語、英語、日本語）で提供されます。
+
+主な機能：
+
+- 様々なオーディオファイル形式のサポート（mp3、wav、ogg、m4a、flac）
+- 自動言語検出と多言語音声認識
+- セグメント単位のテキスト編集と保存
+- 過去の変換履歴の保存と管理
+- 多言語ユーザーインターフェース
+
+## 설치 방법 (Installation Guide / インストール方法)
+
+### 한국어
+
+#### 사전 요구사항
+
+- Python 3.8 이상
+- pip (Python 패키지 관리자) 또는 Conda
+- Git
+- FFmpeg (오디오 처리용)
+
+#### 1. 저장소 복제
 
 ```bash
 git clone https://github.com/yourusername/whisper.git
 cd whisper
 ```
 
-2. 가상환경 생성 및 활성화
+#### 2. 설치 방법 (두 가지 옵션)
+
+##### 옵션 A: 가상 환경 설정 (venv 사용)
 
 ```bash
-python -m venv whisper-env
-source whisper-env/bin/activate  # Windows: whisper-env\Scripts\activate
+# 가상 환경 생성
+python -m venv venv
+
+# 가상 환경 활성화
+# Windows의 경우:
+venv\Scripts\activate
+# macOS/Linux의 경우:
+source venv/bin/activate
+
+# 의존성 설치
+pip install flask flask-babel torch numpy whisper duckdb werkzeug
 ```
 
-3. 의존성 설치
+##### 옵션 B: Conda 환경 설정 (environment.yml 사용)
 
 ```bash
-pip install -r requirements.txt
+# environment.yml 파일이 있는 경우
+conda env create -f environment.yml
+
+# 환경 활성화
+conda activate whisper
+
+# 또는 직접 환경 생성
+conda create -n whisper python=3.10
+conda activate whisper
+conda install -c conda-forge flask flask-babel numpy
+pip install torch whisper duckdb
 ```
 
-4. 애플리케이션 실행
+#### 3. FFmpeg 설치
+
+- **Windows**: [FFmpeg 공식 사이트](https://ffmpeg.org/download.html)에서 다운로드하여 설치하고 PATH에 추가
+- **macOS**: `brew install ffmpeg`
+- **Linux (Ubuntu/Debian)**: `sudo apt-get install ffmpeg`
+
+#### 4. 디렉토리 구조 설정
+
+```bash
+# 업로드 폴더 생성
+mkdir -p static/uploads
+```
+
+#### 5. 애플리케이션 실행
 
 ```bash
 python app.py
 ```
 
-5. 웹 브라우저에서 접속
+#### 6. 웹 브라우저에서 접속
 
+웹 브라우저를 열고 `http://localhost:5000`으로 접속하세요.
+
+### English
+
+#### Prerequisites
+
+- Python 3.8 or higher
+- pip (Python package manager) or Conda
+- Git
+- FFmpeg (for audio processing)
+
+#### 1. Clone the Repository
+
+```bash
+git clone https://github.com/yourusername/whisper.git
+cd whisper
 ```
-http://localhost:4824
+
+#### 2. Installation Methods (Two Options)
+
+##### Option A: Set Up Virtual Environment (using venv)
+
+```bash
+# Create virtual environment
+python -m venv venv
+
+# Activate virtual environment
+# For Windows:
+venv\Scripts\activate
+# For macOS/Linux:
+source venv/bin/activate
+
+# Install dependencies
+pip install flask flask-babel torch numpy whisper duckdb werkzeug
 ```
 
-### 라이선스
+##### Option B: Set Up Conda Environment (using environment.yml)
 
-이 프로젝트는 MIT 라이선스 하에 배포됩니다. 자세한 내용은 [LICENSE](LICENSE) 파일을 참조하세요.
+```bash
+# If environment.yml file is available
+conda env create -f environment.yml
 
----
+# Activate the environment
+conda activate whisper
 
-<a id="日本語"></a>
+# Or create environment manually
+conda create -n whisper python=3.10
+conda activate whisper
+conda install -c conda-forge flask flask-babel numpy
+pip install torch whisper duckdb
+```
 
-## 🇯🇵 日本語
+#### 3. Install FFmpeg
 
-OpenAI の Whisper モデルを使用して、音声ファイルをテキストに変換するウェブアプリケーションです。
+- **Windows**: Download from [FFmpeg official site](https://ffmpeg.org/download.html) and add to PATH
+- **macOS**: `brew install ffmpeg`
+- **Linux (Ubuntu/Debian)**: `sudo apt-get install ffmpeg`
 
-### 主な機能
+#### 4. Set Up Directory Structure
 
-- 様々な音声ファイル形式に対応 (MP3, WAV, OGG, M4A, FLAC)
-- ドラッグ＆ドロップでのファイルアップロード
-- 変換されたテキストのコピー機能
-- レスポンシブデザイン
-- 話者分離機能 (複数話者の会話を区別)
-- 音声再生とテキスト同期 (ハイライトと自動スクロール)
-- 多言語 UI サポート (韓国語、日本語、英語)
+```bash
+# Create uploads folder
+mkdir -p static/uploads
+```
 
----
+#### 5. Run the Application
 
-<a id="english"></a>
+```bash
+python app.py
+```
 
-# Whisper Speech-to-Text Converter
+#### 6. Access in Web Browser
 
-A web application that converts audio files to text using OpenAI's Whisper model.
+Open your web browser and navigate to `http://localhost:5000`.
 
-## Features
+### 日本語
 
-- Support for various audio file formats (MP3, WAV, OGG, M4A, FLAC)
-- Drag and drop file upload
-- Copy converted text functionality
-- Responsive design
-- Speaker differentiation (distinguishing between multiple speakers in conversations)
-- Audio playback with text synchronization (highlighting and auto-scrolling)
+#### 前提条件
 
-## Installation Guide (For Beginners)
+- Python 3.8 以上
+- pip (Python パッケージマネージャー) または Conda
+- Git
+- FFmpeg (オーディオ処理用)
 
-This section provides detailed installation instructions for MAC, Windows, and Linux operating systems.
+#### 1. リポジトリのクローン
 
-### Common Requirements
+```bash
+git clone https://github.com/yourusername/whisper.git
+cd whisper
+```
 
-- Python 3.10 or higher
-- FFmpeg
-- Conda (Miniconda or Anaconda)
+#### 2. インストール方法（2 つのオプション）
 
-### MAC OS Installation Guide
+##### オプション A: 仮想環境のセットアップ（venv を使用）
 
-#### 1. Installing Python and Conda
+```bash
+# 仮想環境の作成
+python -m venv venv
 
-1. **Install Miniconda**:
-   - Download the macOS installer from the [Miniconda download page](https://docs.conda.io/en/latest/miniconda.html).
-   - Run the downloaded `.pkg` file and follow the installation instructions.
-   - After installation, open a terminal and verify the installation with:
-     ```bash
-     conda --version
-     ```
+# 仮想環境の有効化
+# Windowsの場合：
+venv\Scripts\activate
+# macOS/Linuxの場合：
+source venv/bin/activate
 
-#### 2. Installing FFmpeg
+# 依存関係のインストール
+pip install flask flask-babel torch numpy whisper duckdb werkzeug
+```
 
-1. **Installation using Homebrew** (recommended):
+##### オプション B: Conda 環境のセットアップ（environment.yml を使用）
 
-   - If you don't have Homebrew installed, install it with:
-     ```bash
-     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-     ```
-   - Install FFmpeg:
-     ```bash
-     brew install ffmpeg
-     ```
+```bash
+# environment.ymlファイルがある場合
+conda env create -f environment.yml
 
-2. **Manual installation**:
-   - Download the macOS binary from the [FFmpeg download page](https://ffmpeg.org/download.html).
-   - Extract and set up the path.
+# 環境の有効化
+conda activate whisper
 
-#### 3. Downloading the Project
+# または手動で環境を作成
+conda create -n whisper python=3.10
+conda activate whisper
+conda install -c conda-forge flask flask-babel numpy
+pip install torch whisper duckdb
+```
 
-1. **Download using Git** (recommended):
+#### 3. FFmpeg のインストール
 
-   ```bash
-   git clone https://github.com/yourusername/whisper-transcription.git
-   cd whisper-transcription
-   ```
+- **Windows**: [FFmpeg 公式サイト](https://ffmpeg.org/download.html)からダウンロードしてインストールし、PATH に追加
+- **macOS**: `brew install ffmpeg`
+- **Linux (Ubuntu/Debian)**: `sudo apt-get install ffmpeg`
 
-2. **Download as ZIP file**:
-   - On the GitHub page, click the 'Code' button and select 'Download ZIP'.
-   - Extract the downloaded ZIP file.
-   - Open a terminal and navigate to the extracted folder:
-     ```bash
-     cd path_to_extracted_folder
-     ```
+#### 4. ディレクトリ構造のセットアップ
 
-#### 4. Setting Up Virtual Environment and Installing Packages
+```bash
+# アップロードフォルダの作成
+mkdir -p static/uploads
+```
 
-1. **Create and activate a virtual environment**:
+#### 5. アプリケーションの実行
 
-   ```bash
-   conda create -n whisper-env python=3.10
-   conda activate whisper-env
-   ```
-
-2. **Install required packages**:
-
-   ```bash
-   pip install openai-whisper flask python-dotenv librosa
-   ```
-
-3. **Install additional packages for speaker differentiation** (optional):
-   ```bash
-   pip install pyannote.audio
-   ```
+```bash
+python app.py
+```
 
-#### 5. Running the Application
+#### 6. ウェブブラウザでアクセス
 
-1. **Start the application**:
+ウェブブラウザを開き、`http://localhost:5000`にアクセスしてください。
 
-   ```bash
-   python app.py
-   ```
+## 사용 방법 (Usage Guide / 使用方法)
 
-2. **Access in web browser**:
-   - Open your browser and go to `http://127.0.0.1:4824` or `http://localhost:4824`.
+### 한국어
 
-### Windows Installation Guide
+1. 웹 브라우저에서 애플리케이션에 접속합니다.
+2. 오디오 파일을 업로드 영역에 드래그 앤 드롭하거나 파일 선택 버튼을 클릭하여 선택합니다.
+3. 인식할 언어를 선택하거나 '자동 감지'를 선택합니다.
+4. '변환 시작' 버튼을 클릭하여 음성 인식을 시작합니다.
+5. 변환이 완료되면 결과가 세그먼트 단위로 표시됩니다.
+6. 필요한 경우 텍스트를 편집하고 저장할 수 있습니다.
+7. 이전 변환 기록은 메인 페이지에서 확인할 수 있습니다.
 
-#### 1. Installing Python and Conda
+### English
 
-1. **Install Miniconda**:
-   - Download the Windows installer from the [Miniconda download page](https://docs.conda.io/en/latest/miniconda.html).
-   - Run the downloaded `.exe` file and follow the installation instructions.
-   - It's recommended to check the "Add Miniconda3 to my PATH environment variable" option.
-   - After installation, open Anaconda Prompt and verify the installation with:
-     ```bash
-     conda --version
-     ```
+1. Access the application in your web browser.
+2. Drag and drop an audio file to the upload area or click the file selection button.
+3. Select the language for recognition or choose 'Auto Detect'.
+4. Click the 'Start Conversion' button to begin speech recognition.
+5. Once the conversion is complete, the results will be displayed in segments.
+6. You can edit and save the text if needed.
+7. Previous conversion records can be viewed on the main page.
 
-#### 2. Installing FFmpeg
+### 日本語
 
-1. **Download from the official site**:
+1. ウェブブラウザでアプリケーションにアクセスします。
+2. オーディオファイルをアップロードエリアにドラッグ＆ドロップするか、ファイル選択ボタンをクリックして選択します。
+3. 認識する言語を選択するか、「自動検出」を選択します。
+4. 「変換開始」ボタンをクリックして音声認識を開始します。
+5. 変換が完了すると、結果がセグメント単位で表示されます。
+6. 必要に応じてテキストを編集して保存できます。
+7. 過去の変換履歴はメインページで確認できます。
 
-   - Download the Windows binary from the [FFmpeg download page](https://ffmpeg.org/download.html).
-   - Extract the downloaded file and note the location of the `bin` folder inside.
-   - Add the FFmpeg `bin` folder path to your system's PATH environment variable:
-     - Control Panel > System > Advanced System Settings > Environment Variables
-     - In the 'System variables' section, find the 'Path' variable and edit it
-     - Click 'New' and add the full path to the FFmpeg `bin` folder
-     - Click OK to save
+## 라이센스 (License / ライセンス)
 
-2. **Installation using Chocolatey** (alternative):
-   - Run PowerShell as administrator.
-   - If you don't have Chocolatey installed, install it with:
-     ```powershell
-     Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
-     ```
-   - Install FFmpeg:
-     ```powershell
-     choco install ffmpeg
-     ```
-
-#### 3. Downloading the Project
-
-1. **Download using Git**:
-
-   - Install [Git for Windows](https://gitforwindows.org/).
-   - Open Git Bash or Command Prompt and run:
-     ```bash
-     git clone https://github.com/yourusername/whisper-transcription.git
-     cd whisper-transcription
-     ```
-
-2. **Download as ZIP file**:
-   - On the GitHub page, click the 'Code' button and select 'Download ZIP'.
-   - Extract the downloaded ZIP file to your desired location.
-   - Open Command Prompt and navigate to the extracted folder:
-     ```bash
-     cd path_to_extracted_folder
-     ```
-
-#### 4. Setting Up Virtual Environment and Installing Packages
-
-1. **Create and activate a virtual environment**:
-
-   - Open Anaconda Prompt and run:
-     ```bash
-     conda create -n whisper-env python=3.10
-     conda activate whisper-env
-     ```
-
-2. **Install required packages**:
-
-   ```bash
-   pip install openai-whisper flask python-dotenv librosa
-   ```
-
-3. **Install additional packages for speaker differentiation** (optional):
-   ```bash
-   pip install pyannote.audio
-   ```
-
-#### 5. Running the Application
-
-1. **Start the application**:
-
-   - In Anaconda Prompt with the virtual environment activated, run:
-     ```bash
-     python app.py
-     ```
-
-2. **Access in web browser**:
-   - Open your browser and go to `http://127.0.0.1:4824` or `http://localhost:4824`.
-
-### Linux Installation Guide (Ubuntu/Debian based)
-
-#### 1. Installing Python and Conda
-
-1. **Install Miniconda**:
-
-   ```bash
-   # Download the installer
-   wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-
-   # Give execute permission
-   chmod +x Miniconda3-latest-Linux-x86_64.sh
-
-   # Run the installer
-   ./Miniconda3-latest-Linux-x86_64.sh
-   ```
-
-   - During installation, you'll be prompted to accept the license and confirm the installation path.
-   - After installation, either restart your terminal or update your environment with:
-     ```bash
-     source ~/.bashrc
-     ```
-   - Verify the installation:
-     ```bash
-     conda --version
-     ```
-
-#### 2. Installing FFmpeg
-
-1. **Installation using package manager**:
-
-   ```bash
-   sudo apt update
-   sudo apt install ffmpeg
-   ```
-
-2. **Verify installation**:
-   ```bash
-   ffmpeg -version
-   ```
-
-#### 3. Downloading the Project
-
-1. **Download using Git**:
-
-   ```bash
-   # Install Git if not already installed
-   sudo apt install git
-
-   # Clone the project
-   git clone https://github.com/yourusername/whisper-transcription.git
-   cd whisper-transcription
-   ```
-
-2. **Download as ZIP file**:
-
-   ```bash
-   # Install necessary tools
-   sudo apt install wget unzip
-
-   # Download the ZIP file (example GitHub URL)
-   wget https://github.com/yourusername/whisper-transcription/archive/refs/heads/main.zip
-
-   # Extract
-   unzip main.zip
-
-   # Navigate to the folder
-   cd whisper-transcription-main
-   ```
-
-#### 4. Setting Up Virtual Environment and Installing Packages
-
-1. **Create and activate a virtual environment**:
-
-   ```bash
-   conda create -n whisper-env python=3.10
-   conda activate whisper-env
-   ```
-
-2. **Install required packages**:
-
-   ```bash
-   pip install openai-whisper flask python-dotenv librosa
-   ```
-
-3. **Install additional packages for speaker differentiation** (optional):
-   ```bash
-   pip install pyannote.audio
-   ```
-
-#### 5. Running the Application
-
-1. **Start the application**:
-
-   ```bash
-   python app.py
-   ```
-
-2. **Access in web browser**:
-   - Open your browser and go to `http://127.0.0.1:4824` or `http://localhost:4824`.
-
-## How to Use
-
-1. Access `http://localhost:4824` in your web browser
-
-2. Upload or drag and drop an audio file
-
-   - Supported formats: MP3, WAV, OGG, M4A, FLAC
-   - Maximum file size: 60MB
-
-3. Select the "Enable Speaker Differentiation" option if needed
-
-   - Choose this option to distinguish between multiple speakers in a conversation
-
-4. Check the conversion progress
-
-   - You can monitor the processing status with the progress bar and status messages
-
-5. Review the conversion results
-
-   - Text results will be displayed with speaker differentiation
-   - You can play the original audio using the audio player
-   - During audio playback, the corresponding text will be highlighted
-
-6. Use the copy text button to copy the results if needed
-
-## Troubleshooting
-
-### Common Issues
-
-1. **"FFmpeg not found" error**
-
-   - Verify that FFmpeg is correctly installed
-   - Check that FFmpeg is added to your system PATH
-
-2. **"No module named 'whisper'" error**
-
-   - Ensure that your virtual environment is activated
-   - Try reinstalling the package with `pip install openai-whisper`
-
-3. **File upload errors**
-
-   - Check that your file format is supported (MP3, WAV, OGG, M4A, FLAC)
-   - Ensure that your file size is under 60MB
-
-4. **Slow processing speed**
-   - Large files may take longer to process
-   - Processing speed can vary depending on your computer specifications
-   - Try splitting into smaller audio files for processing
-
-### Operating System Specific Issues
-
-#### MAC OS
-
-1. **FFmpeg installation issues**
-
-   ```bash
-   # Update Homebrew and try again
-   brew update
-   brew install ffmpeg
-   ```
-
-2. **Permission issues**
-   ```bash
-   # Grant write permissions to the project folder
-   chmod -R 755 whisper-transcription
-   ```
-
-#### Windows
-
-1. **FFmpeg path issues**
-
-   - Restart your system to apply environment variable changes
-   - Run `ffmpeg -version` in Command Prompt to verify the installation
-
-2. **CUDA related errors** (when using GPU)
-   - Install the latest NVIDIA drivers
-   - Check that your CUDA version is compatible with PyTorch
-
-#### Linux
-
-1. **Library dependency issues**
-
-   ```bash
-   # Install necessary system libraries
-   sudo apt update
-   sudo apt install libsndfile1 libasound2-dev portaudio19-dev
-   ```
-
-2. **Permission issues**
-   ```bash
-   # Grant write permissions to the project folder
-   chmod -R 755 whisper-transcription
-   ```
-
-## References
-
-- [OpenAI Whisper](https://github.com/openai/whisper)
-- [Flask](https://flask.palletsprojects.com/)
-- [FFmpeg](https://ffmpeg.org/)
-- [Conda](https://docs.conda.io/)
+이 프로젝트는 MIT 라이센스 하에 배포됩니다. 자세한 내용은 LICENSE 파일을 참조하세요.
+This project is distributed under the MIT License. See the LICENSE file for more details.
+このプロジェクトは MIT ライセンスの下で配布されています。詳細は LICENSE ファイルを参照してください。
