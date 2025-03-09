@@ -78,13 +78,41 @@
         padding: 0.5rem;
         margin-bottom: 0.75rem;
         border-radius: 4px;
-        transition: background-color 0.3s;
+        transition: all 0.3s ease;
         border: 1px solid #f0f0f0;
+        border-left: 4px solid transparent;
+        cursor: pointer;
+        position: relative;
+      }
+
+      .segment:hover {
+        background-color: #f8f9fa;
+        border-left: 4px solid #e9ecef;
       }
 
       .segment.active {
         background-color: #fff8e1;
         box-shadow: 0 0 0 2px #ffd54f;
+        border-left: 4px solid #ffc107;
+        padding-left: 0.75rem;
+        font-weight: 500;
+      }
+
+      /* 현재 재생 중인 세그먼트 표시 애니메이션 */
+      @keyframes pulse-border {
+        0% {
+          box-shadow: 0 0 0 0 rgba(255, 193, 7, 0.4);
+        }
+        70% {
+          box-shadow: 0 0 0 6px rgba(255, 193, 7, 0);
+        }
+        100% {
+          box-shadow: 0 0 0 0 rgba(255, 193, 7, 0);
+        }
+      }
+
+      .segment.active {
+        animation: pulse-border 2s infinite;
       }
 
       .segment-text {
@@ -124,6 +152,12 @@
       .session-card:hover {
         transform: translateY(-2px);
         box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      .session-card.active {
+        border-color: #0d6efd;
+        background-color: #f0f7ff;
+        box-shadow: 0 4px 8px rgba(13, 110, 253, 0.2);
       }
 
       .session-card .card-body {
@@ -176,6 +210,40 @@
           margin-bottom: 1rem;
           text-align: right;
         }
+      }
+
+      /* 세그먼트 편집 스타일 */
+      .segment-edit-form {
+        margin-top: 0.5rem;
+      }
+
+      .segment-edit-textarea {
+        min-height: 60px;
+        font-size: 0.95rem;
+      }
+
+      .edit-segment-btn {
+        opacity: 0.3;
+        transition: opacity 0.2s;
+      }
+
+      .segment:hover .edit-segment-btn {
+        opacity: 1;
+      }
+
+      /* 토스트 컨테이너 스타일 */
+      .toast-container {
+        z-index: 1050;
+      }
+
+      /* 세션 삭제 버튼 스타일 */
+      .delete-session-btn {
+        opacity: 0.7;
+        transition: opacity 0.2s;
+      }
+
+      .delete-session-btn:hover {
+        opacity: 1;
       }
     </style>
   </head>
@@ -354,6 +422,16 @@
                             >{{ languages[session.language] }}</span
                           >
                         </p>
+                        <div class="d-flex justify-content-end mt-2">
+                          <button
+                            class="btn btn-sm btn-outline-danger delete-session-btn"
+                            data-session-id="{{ session.id }}"
+                            data-session-name="{{ session.filename }}"
+                            title="{{ _('이 세션 삭제') }}"
+                          >
+                            <i class="bi bi-trash"></i> {{ _('삭제') }}
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -396,6 +474,52 @@
       </div>
     </div>
 
+    <!-- 세션 삭제 확인 모달 -->
+    <div
+      class="modal fade"
+      id="deleteSessionModal"
+      tabindex="-1"
+      aria-labelledby="deleteSessionModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="deleteSessionModalLabel">
+              {{ _('세션 삭제 확인') }}
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <p>{{ _('다음 세션을 삭제하시겠습니까?') }}</p>
+            <p id="delete-session-name" class="fw-bold"></p>
+            <p class="text-danger">{{ _('이 작업은 되돌릴 수 없습니다.') }}</p>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              {{ _('취소') }}
+            </button>
+            <button
+              type="button"
+              class="btn btn-danger"
+              id="confirm-delete-btn"
+            >
+              {{ _('삭제') }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
       document.addEventListener("DOMContentLoaded", function () {
@@ -419,11 +543,21 @@
         let statusCheckInterval = null;
         let segments = []; // 세그먼트 정보 저장
         let activeSegmentIndex = -1; // 현재 활성화된 세그먼트 인덱스
+        let deleteSessionId = null; // 삭제할 세션 ID
 
         // 세션 카드 클릭 이벤트 처리
         document.querySelectorAll(".session-card").forEach((card) => {
           card.addEventListener("click", function () {
             const sessionId = this.getAttribute("data-session-id");
+
+            // 모든 세션 카드에서 active 클래스 제거
+            document.querySelectorAll(".session-card").forEach((c) => {
+              c.classList.remove("active");
+            });
+
+            // 클릭한 카드에 active 클래스 추가
+            this.classList.add("active");
+
             loadSession(sessionId);
           });
         });
@@ -444,8 +578,18 @@
                 resultContainer.style.display = "block";
 
                 // 세그먼트 정보 저장
-                if (data.segments) {
+                if (data.segments && data.segments.length > 0) {
                   segments = data.segments;
+                  console.log("세그먼트 데이터 로드됨:", segments.length);
+                } else {
+                  console.log(
+                    "세그먼트 데이터가 없습니다. 텍스트에서 세그먼트 생성 시도"
+                  );
+                  // 세그먼트 데이터가 없는 경우 텍스트에서 세그먼트 생성
+                  if (data.transcription) {
+                    segments = createSegmentsFromText(data.transcription);
+                    console.log("텍스트에서 세그먼트 생성됨:", segments.length);
+                  }
                 }
 
                 // 오디오 플레이어 설정
@@ -453,7 +597,7 @@
                   setupAudioPlayer(data.audio_path);
                 }
 
-                // 변환 결과 표시
+                // 변환 결과 표시 (세그먼트 데이터 전달)
                 displayTranscriptionResult(data.transcription);
 
                 // 탭 전환
@@ -462,13 +606,46 @@
                 tab.show();
               } else {
                 loading.style.display = "none";
-                alert("{{ _('오류:') }} " + (data.error || "{{ _('세션을 불러올 수 없습니다.') }}"));
+                alert(
+                  "{{ _('오류:') }} " +
+                    (data.error || "{{ _('세션을 불러올 수 없습니다.') }}")
+                );
               }
             })
             .catch((error) => {
               loading.style.display = "none";
-              alert("{{ _('세션 로드 중 오류가 발생했습니다:') }} " + error.message);
+              alert(
+                "{{ _('세션 로드 중 오류가 발생했습니다:') }} " + error.message
+              );
             });
+        }
+
+        // 텍스트에서 세그먼트 생성 함수
+        function createSegmentsFromText(text) {
+          const lines = text.split("\n").filter((line) => line.trim() !== "");
+          const segments = [];
+
+          let startTime = 0;
+
+          // 텍스트 길이에 따라 세그먼트 길이 조정
+          lines.forEach((line, index) => {
+            // 텍스트 길이에 비례하여 지속 시간 계산 (최소 2초, 최대 5초)
+            const wordCount = line.split(/\s+/).length;
+            const duration = Math.min(Math.max(wordCount * 0.5, 2), 5);
+
+            // 세그먼트 간 약간의 간격 추가 (0.2초)
+            // 이렇게 하면 세그먼트 간 전환이 더 자연스러워짐
+            const endTime = startTime + duration;
+            segments.push({
+              text: line,
+              start: startTime,
+              end: endTime - 0.2, // 세그먼트 끝에서 약간의 시간 제거
+            });
+            startTime = endTime;
+          });
+
+          console.log("생성된 세그먼트:", segments);
+          return segments;
         }
 
         selectFileBtn.addEventListener("click", function (e) {
@@ -569,7 +746,9 @@
               if (contentType && contentType.includes("application/json")) {
                 return response.json();
               } else {
-                throw new Error("{{ _('서버가 JSON이 아닌 응답을 반환했습니다') }}");
+                throw new Error(
+                  "{{ _('서버가 JSON이 아닌 응답을 반환했습니다') }}"
+                );
               }
             })
             .then((data) => {
@@ -583,7 +762,9 @@
             })
             .catch((error) => {
               loading.style.display = "none";
-              alert("{{ _('업로드 중 오류가 발생했습니다:') }} " + error.message);
+              alert(
+                "{{ _('업로드 중 오류가 발생했습니다:') }} " + error.message
+              );
             });
         }
 
@@ -674,7 +855,7 @@
           const text = transcriptionResult.textContent;
           navigator.clipboard.writeText(text).then(() => {
             const originalText = copyBtn.innerHTML;
-            copyBtn.innerHTML = '<i class="bi bi-check"></i> {{ _('복사됨') }}';
+            copyBtn.innerHTML = '<i class="bi bi-check"></i> {{ _("복사됨") }}';
             setTimeout(() => {
               copyBtn.innerHTML = originalText;
             }, 2000);
@@ -685,6 +866,170 @@
           const div = document.createElement("div");
           div.textContent = text;
           return div.innerHTML;
+        }
+
+        // 세그먼트 텍스트 업데이트 함수
+        function updateSegmentText(segmentId, newText, index) {
+          // 현재 세션 ID 가져오기
+          const sessionId =
+            currentTaskId ||
+            document
+              .querySelector(".session-card.active")
+              ?.getAttribute("data-session-id");
+
+          console.log("업데이트 요청:", {
+            sessionId,
+            segmentId,
+            index,
+            newText,
+            segments,
+          });
+
+          if (!sessionId) {
+            showToast("세션 ID를 찾을 수 없습니다.", "danger");
+            return;
+          }
+
+          // 세그먼트 ID 확인 및 수정
+          // 세그먼트 ID가 없거나 유효하지 않은 경우 인덱스를 사용
+          const validSegmentId =
+            segmentId !== undefined && segmentId !== null && segmentId !== ""
+              ? segmentId
+              : index;
+
+          console.log("유효한 세그먼트 ID:", validSegmentId);
+
+          // API 요청 데이터
+          const data = {
+            segment_id: validSegmentId,
+            text: newText,
+            session_id: sessionId,
+          };
+
+          console.log("API 요청 데이터:", JSON.stringify(data));
+
+          // 로딩 표시
+          const segmentElement = document.getElementById(`segment-${index}`);
+          const saveButton = segmentElement.querySelector(".save-edit-btn");
+          const originalButtonText = saveButton.textContent;
+          saveButton.innerHTML =
+            '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 저장 중...';
+          saveButton.disabled = true;
+
+          // API 호출
+          fetch("/update_segment", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data),
+          })
+            .then((response) => {
+              console.log("응답 상태:", response.status);
+              return response.json();
+            })
+            .then((data) => {
+              console.log("업데이트 응답:", data);
+              if (data.success) {
+                // UI 업데이트
+                segmentElement.querySelector(".segment-text").textContent =
+                  newText;
+                segmentElement.querySelector(".segment-text").style.display =
+                  "block";
+                segmentElement.querySelector(
+                  ".segment-edit-form"
+                ).style.display = "none";
+                segmentElement.querySelector(
+                  ".edit-segment-btn"
+                ).style.display = "inline-block";
+
+                // 세그먼트 데이터 업데이트
+                segments[index].text = newText;
+
+                // 성공 메시지 표시
+                showToast(
+                  "세그먼트가 성공적으로 업데이트되었습니다.",
+                  "success"
+                );
+              } else {
+                // 오류 메시지 표시
+                showToast("세그먼트 업데이트 실패: " + data.error, "danger");
+              }
+            })
+            .catch((error) => {
+              console.error("업데이트 오류:", error);
+              // 오류 메시지 표시
+              showToast(
+                "세그먼트 업데이트 중 오류 발생: " + error.message,
+                "danger"
+              );
+            })
+            .finally(() => {
+              // 로딩 표시 제거
+              saveButton.textContent = originalButtonText;
+              saveButton.disabled = false;
+            });
+        }
+
+        // 토스트 메시지 표시 함수
+        function showToast(message, type = "info") {
+          // 이미 있는 토스트 컨테이너 확인
+          let toastContainer = document.querySelector(".toast-container");
+
+          // 없으면 생성
+          if (!toastContainer) {
+            toastContainer = document.createElement("div");
+            toastContainer.className =
+              "toast-container position-fixed bottom-0 end-0 p-3";
+            document.body.appendChild(toastContainer);
+          }
+
+          // 토스트 ID 생성
+          const toastId = "toast-" + Date.now();
+
+          // 토스트 HTML 생성
+          const toastHtml = `
+            <div id="${toastId}" class="toast align-items-center text-white bg-${type} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+              <div class="d-flex">
+                <div class="toast-body">
+                  ${message}
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+              </div>
+            </div>
+          `;
+
+          // 토스트 추가
+          toastContainer.insertAdjacentHTML("beforeend", toastHtml);
+
+          // 토스트 객체 생성 및 표시
+          const toastElement = document.getElementById(toastId);
+          const toast = new bootstrap.Toast(toastElement, { delay: 3000 });
+          toast.show();
+
+          // 자동 제거
+          toastElement.addEventListener("hidden.bs.toast", function () {
+            this.remove();
+          });
+        }
+
+        // 시간 업데이트 핸들러 (디바운싱 적용)
+        let lastUpdateTime = 0;
+        function handleTimeUpdate() {
+          const currentTime = this.currentTime;
+          const now = Date.now();
+
+          // 디바운싱 시간 증가 (150ms로 변경)
+          // 자막이 너무 빨리 이동하는 문제 해결
+          if (now - lastUpdateTime > 150) {
+            // 오디오 재생 속도에 따른 조정
+            const playbackRate = this.playbackRate || 1.0;
+            console.log("재생 속도:", playbackRate);
+
+            // 재생 속도가 빠를수록 더 큰 지연 적용
+            highlightCurrentSegment(currentTime);
+            lastUpdateTime = now;
+          }
         }
 
         // 오디오 플레이어 설정
@@ -701,10 +1046,24 @@
           // 오디오 플레이어 표시
           audioContainer.style.display = "block";
 
-          // 오디오 시간 업데이트 이벤트 리스너
-          audioPlayer.addEventListener("timeupdate", function () {
-            const currentTime = audioPlayer.currentTime;
-            highlightCurrentSegment(currentTime);
+          // 기존 이벤트 리스너 제거 (중복 방지)
+          audioPlayer.removeEventListener("timeupdate", handleTimeUpdate);
+
+          // 오디오 시간 업데이트 이벤트 리스너 추가
+          audioPlayer.addEventListener("timeupdate", handleTimeUpdate);
+
+          // 재생 속도 변경 이벤트 리스너
+          audioPlayer.addEventListener("ratechange", function () {
+            console.log("재생 속도 변경됨:", this.playbackRate);
+          });
+
+          // 오디오 로드 완료 이벤트
+          audioPlayer.addEventListener("loadedmetadata", function () {
+            console.log(
+              "오디오 로드 완료, 총 길이:",
+              audioPlayer.duration.toFixed(2),
+              "초"
+            );
           });
         }
 
@@ -712,19 +1071,59 @@
         function highlightCurrentSegment(currentTime) {
           if (!segments || segments.length === 0) return;
 
+          // 디버깅 정보 출력
+          console.log("현재 오디오 시간:", currentTime.toFixed(2));
+
+          // 약간의 지연 시간 추가 (자막이 소리보다 빠른 문제 해결)
+          const adjustedTime = Math.max(0, currentTime - 0.3);
+          console.log("조정된 시간:", adjustedTime.toFixed(2));
+
           // 현재 시간에 해당하는 세그먼트 찾기
           let foundIndex = -1;
+          let closestSegment = null;
+          let minDistance = Infinity;
 
+          // 정확한 범위 내에 있는 세그먼트 찾기
           for (let i = 0; i < segments.length; i++) {
             const segment = segments[i];
-            if (currentTime >= segment.start && currentTime <= segment.end) {
+
+            // 조정된 시간으로 세그먼트 검색
+            if (adjustedTime >= segment.start && adjustedTime <= segment.end) {
               foundIndex = i;
               break;
             }
+
+            // 가장 가까운 세그먼트 찾기 (정확한 범위 내에 없는 경우를 대비)
+            const startDistance = Math.abs(adjustedTime - segment.start);
+            const endDistance = Math.abs(adjustedTime - segment.end);
+            const distance = Math.min(startDistance, endDistance);
+
+            if (distance < minDistance) {
+              minDistance = distance;
+              closestSegment = i;
+            }
+          }
+
+          // 정확한 범위 내에 세그먼트가 없으면 가장 가까운 세그먼트 사용
+          // 거리 임계값을 늘려 더 관대하게 세그먼트 선택
+          if (
+            foundIndex === -1 &&
+            closestSegment !== null &&
+            minDistance < 2.5
+          ) {
+            foundIndex = closestSegment;
+            console.log(
+              "가장 가까운 세그먼트 선택:",
+              foundIndex,
+              "거리:",
+              minDistance.toFixed(2)
+            );
           }
 
           // 이전 세그먼트와 다른 경우에만 업데이트
           if (foundIndex !== activeSegmentIndex) {
+            console.log("세그먼트 변경:", activeSegmentIndex, "->", foundIndex);
+
             // 이전 활성 세그먼트 비활성화
             if (activeSegmentIndex >= 0) {
               const prevSegmentElement = document.getElementById(
@@ -743,7 +1142,7 @@
               if (newSegmentElement) {
                 newSegmentElement.classList.add("active");
 
-                // 해당 세그먼트로 스크롤
+                // 해당 세그먼트로 스크롤 (부드러운 스크롤 사용)
                 newSegmentElement.scrollIntoView({
                   behavior: "smooth",
                   block: "center",
@@ -762,15 +1161,40 @@
           if (segments && segments.length > 0) {
             let html = "";
 
+            console.log("세그먼트 데이터:", segments);
+
             segments.forEach((segment, index) => {
               const text = segment.text;
               const start = segment.start.toFixed(1);
               const end = segment.end.toFixed(1);
 
-              // 세그먼트 HTML 생성
-              html += `<div id="segment-${index}" class="segment" data-start="${start}" data-end="${end}">`;
+              // 세그먼트 ID 처리 (문자열로 변환)
+              // 세그먼트 ID가 없는 경우 인덱스를 사용
+              const segmentId =
+                segment.id !== undefined ? String(segment.id) : String(index);
+
+              console.log(
+                `세그먼트 ${index}: ID=${segmentId}, 원본ID=${
+                  segment.id
+                }, 타입=${typeof segment.id}`
+              );
+
+              // 세그먼트 HTML 생성 (수정 버튼 추가)
+              html += `<div id="segment-${index}" class="segment" data-start="${start}" data-end="${end}" data-segment-id="${segmentId}">`;
+              html += `<div class="d-flex justify-content-between align-items-start">`;
               html += `<span class="time">[${start}s - ${end}s]</span>`;
+              html += `<button class="btn btn-sm btn-outline-secondary edit-segment-btn" data-index="${index}"><i class="bi bi-pencil"></i></button>`;
+              html += `</div>`;
               html += `<div class="segment-text">${escapeHtml(text)}</div>`;
+              html += `<div class="segment-edit-form" style="display: none;">`;
+              html += `<textarea class="form-control segment-edit-textarea mb-2">${escapeHtml(
+                text
+              )}</textarea>`;
+              html += `<div class="d-flex justify-content-end">`;
+              html += `<button class="btn btn-sm btn-secondary me-2 cancel-edit-btn">취소</button>`;
+              html += `<button class="btn btn-sm btn-primary save-edit-btn">저장</button>`;
+              html += `</div>`;
+              html += `</div>`;
               html += `</div>`;
             });
 
@@ -778,23 +1202,239 @@
 
             // 세그먼트 클릭 이벤트 추가
             document.querySelectorAll(".segment").forEach((element) => {
-              element.addEventListener("click", function () {
+              element.addEventListener("click", function (e) {
+                // 편집 버튼이나 편집 폼 요소를 클릭한 경우 오디오 이동 방지
+                if (
+                  e.target.closest(".edit-segment-btn") ||
+                  e.target.closest(".segment-edit-form")
+                ) {
+                  return;
+                }
+
                 const start = parseFloat(this.getAttribute("data-start"));
                 const audioPlayer = document.getElementById("audio-player");
 
                 // 오디오 플레이어 시간 이동
                 audioPlayer.currentTime = start;
 
+                // 세그먼트 활성화 (즉시 시각적 피드백 제공)
+                const index = parseInt(this.id.replace("segment-", ""));
+
+                // 이전 활성 세그먼트 비활성화
+                if (activeSegmentIndex >= 0 && activeSegmentIndex !== index) {
+                  const prevSegmentElement = document.getElementById(
+                    `segment-${activeSegmentIndex}`
+                  );
+                  if (prevSegmentElement) {
+                    prevSegmentElement.classList.remove("active");
+                  }
+                }
+
+                // 새 세그먼트 활성화
+                this.classList.add("active");
+                activeSegmentIndex = index;
+
+                // 세그먼트 정보 출력
+                console.log(
+                  "세그먼트 클릭:",
+                  index,
+                  "시작 시간:",
+                  start,
+                  "텍스트:",
+                  segments[index].text
+                );
+
                 // 재생 중이 아니면 재생 시작
                 if (audioPlayer.paused) {
-                  audioPlayer.play();
+                  audioPlayer
+                    .play()
+                    .then(() => {
+                      console.log("재생 시작됨");
+                    })
+                    .catch((err) => {
+                      console.error("재생 시작 오류:", err);
+                    });
                 }
+              });
+            });
+
+            // 수정 버튼 클릭 이벤트
+            document.querySelectorAll(".edit-segment-btn").forEach((button) => {
+              button.addEventListener("click", function (e) {
+                e.stopPropagation();
+                const index = this.getAttribute("data-index");
+                const segmentElement = document.getElementById(
+                  `segment-${index}`
+                );
+
+                // 텍스트 영역 숨기고 편집 폼 표시
+                segmentElement.querySelector(".segment-text").style.display =
+                  "none";
+                segmentElement.querySelector(
+                  ".segment-edit-form"
+                ).style.display = "block";
+
+                // 편집 버튼 숨기기
+                this.style.display = "none";
+
+                // 텍스트 영역에 포커스
+                segmentElement.querySelector(".segment-edit-textarea").focus();
+              });
+            });
+
+            // 취소 버튼 클릭 이벤트
+            document.querySelectorAll(".cancel-edit-btn").forEach((button) => {
+              button.addEventListener("click", function (e) {
+                e.stopPropagation();
+                const segmentElement = this.closest(".segment");
+
+                // 편집 폼 숨기고 텍스트 영역 표시
+                segmentElement.querySelector(
+                  ".segment-edit-form"
+                ).style.display = "none";
+                segmentElement.querySelector(".segment-text").style.display =
+                  "block";
+
+                // 편집 버튼 다시 표시
+                segmentElement.querySelector(
+                  ".edit-segment-btn"
+                ).style.display = "inline-block";
+              });
+            });
+
+            // 저장 버튼 클릭 이벤트
+            document.querySelectorAll(".save-edit-btn").forEach((button) => {
+              button.addEventListener("click", function (e) {
+                e.stopPropagation();
+                const segmentElement = this.closest(".segment");
+                const segmentId =
+                  segmentElement.getAttribute("data-segment-id");
+                const newText = segmentElement.querySelector(
+                  ".segment-edit-textarea"
+                ).value;
+                const index = parseInt(
+                  segmentElement.id.replace("segment-", "")
+                );
+
+                // 세그먼트 업데이트 API 호출
+                updateSegmentText(segmentId, newText, index);
               });
             });
           } else {
             // 기존 방식으로 결과 표시 (세그먼트 정보가 없는 경우)
             transcriptionResult.innerHTML = escapeHtml(transcription);
           }
+        }
+
+        // 세션 삭제 버튼 클릭 이벤트 처리
+        document.querySelectorAll(".delete-session-btn").forEach((button) => {
+          button.addEventListener("click", function (e) {
+            e.stopPropagation(); // 세션 카드 클릭 이벤트 방지
+
+            // 세션 정보 가져오기
+            const sessionId = this.getAttribute("data-session-id");
+            const sessionName = this.getAttribute("data-session-name");
+
+            // 모달에 세션 정보 표시
+            document.getElementById("delete-session-name").textContent =
+              sessionName;
+
+            // 삭제할 세션 ID 저장
+            deleteSessionId = sessionId;
+
+            // 모달 표시
+            const deleteModal = new bootstrap.Modal(
+              document.getElementById("deleteSessionModal")
+            );
+            deleteModal.show();
+          });
+        });
+
+        // 세션 삭제 확인 버튼 클릭 이벤트
+        document
+          .getElementById("confirm-delete-btn")
+          .addEventListener("click", function () {
+            if (!deleteSessionId) return;
+
+            // 삭제 API 호출
+            deleteSession(deleteSessionId);
+
+            // 모달 닫기
+            const deleteModal = bootstrap.Modal.getInstance(
+              document.getElementById("deleteSessionModal")
+            );
+            deleteModal.hide();
+          });
+
+        // 세션 삭제 함수
+        function deleteSession(sessionId) {
+          // 로딩 표시
+          const deleteBtn = document.querySelector(
+            `.delete-session-btn[data-session-id="${sessionId}"]`
+          );
+          const originalBtnHtml = deleteBtn.innerHTML;
+          deleteBtn.innerHTML =
+            '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 삭제 중...';
+          deleteBtn.disabled = true;
+
+          // 삭제 API 호출
+          fetch(`/delete_session/${sessionId}`, {
+            method: "DELETE",
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.success) {
+                // 성공 메시지 표시
+                showToast("세션이 성공적으로 삭제되었습니다.", "success");
+
+                // 세션 카드 제거
+                const sessionCard = document.querySelector(
+                  `.session-card[data-session-id="${sessionId}"]`
+                );
+                if (sessionCard) {
+                  const parentCol = sessionCard.closest(".col-md-6");
+                  if (parentCol) {
+                    parentCol.remove();
+                  }
+                }
+
+                // 세션 목록이 비어있는지 확인
+                const sessionCards = document.querySelectorAll(".session-card");
+                if (sessionCards.length === 0) {
+                  // 세션이 없는 경우 메시지 표시
+                  const sessionList = document.querySelector(".session-list");
+                  sessionList.innerHTML = `
+                    <div class="alert alert-info">
+                      {{ _('아직 변환 기록이 없습니다. 새 파일을 변환해보세요.') }}
+                    </div>
+                  `;
+                }
+
+                // 현재 표시 중인 세션이 삭제된 경우 결과 컨테이너 숨기기
+                if (currentTaskId === sessionId) {
+                  resultContainer.style.display = "none";
+                  currentTaskId = null;
+                }
+              } else {
+                // 오류 메시지 표시
+                showToast(
+                  "세션 삭제 실패: " + (data.error || "알 수 없는 오류"),
+                  "danger"
+                );
+
+                // 버튼 복원
+                deleteBtn.innerHTML = originalBtnHtml;
+                deleteBtn.disabled = false;
+              }
+            })
+            .catch((error) => {
+              // 오류 메시지 표시
+              showToast("세션 삭제 중 오류 발생: " + error.message, "danger");
+
+              // 버튼 복원
+              deleteBtn.innerHTML = originalBtnHtml;
+              deleteBtn.disabled = false;
+            });
         }
       });
     </script>

@@ -1,10 +1,23 @@
 [Mastergear's Toy Project]
 
-# Whisper 음성-텍스트 변환기
+# Whisper 음성-텍스트 변환기 | 音声テキスト変換ツール | Speech-to-Text Converter
+
+<div align="center">
+  <h3>🌏 언어 선택 | 言語選択 | Language Selection</h3>
+  <a href="#한국어">한국어</a> |
+  <a href="#日本語">日本語</a> |
+  <a href="#english">English</a>
+</div>
+
+---
+
+<a id="한국어"></a>
+
+## 🇰🇷 한국어
 
 OpenAI의 Whisper 모델을 사용하여 음성 파일을 텍스트로 변환하는 웹 애플리케이션입니다.
 
-## 기능
+### 주요 기능
 
 - 다양한 오디오 파일 형식 지원 (MP3, WAV, OGG, M4A, FLAC)
 - 드래그 앤 드롭 파일 업로드
@@ -12,378 +25,414 @@ OpenAI의 Whisper 모델을 사용하여 음성 파일을 텍스트로 변환하
 - 반응형 디자인
 - 화자 구분 기능 (다중 화자 대화 구분)
 - 오디오 재생과 텍스트 동기화 (하이라이트 및 자동 스크롤)
+- 다국어 UI 지원 (한국어, 일본어, 영어)
 
-## 설치 가이드 (초보자용)
+---
 
-이 섹션에서는 MAC, Windows, Linux 각 운영체제별로 설치 방법을 자세히 설명합니다.
+<a id="日本語"></a>
 
-### 공통 요구사항
+## 🇯🇵 日本語
 
-- Python 3.10 이상
+OpenAI の Whisper モデルを使用して、音声ファイルをテキストに変換するウェブアプリケーションです。
+
+### 主な機能
+
+- 様々な音声ファイル形式に対応 (MP3, WAV, OGG, M4A, FLAC)
+- ドラッグ＆ドロップでのファイルアップロード
+- 変換されたテキストのコピー機能
+- レスポンシブデザイン
+- 話者分離機能 (複数話者の会話を区別)
+- 音声再生とテキスト同期 (ハイライトと自動スクロール)
+- 多言語 UI サポート (韓国語、日本語、英語)
+
+---
+
+<a id="english"></a>
+
+# Whisper Speech-to-Text Converter
+
+A web application that converts audio files to text using OpenAI's Whisper model.
+
+## Features
+
+- Support for various audio file formats (MP3, WAV, OGG, M4A, FLAC)
+- Drag and drop file upload
+- Copy converted text functionality
+- Responsive design
+- Speaker differentiation (distinguishing between multiple speakers in conversations)
+- Audio playback with text synchronization (highlighting and auto-scrolling)
+
+## Installation Guide (For Beginners)
+
+This section provides detailed installation instructions for MAC, Windows, and Linux operating systems.
+
+### Common Requirements
+
+- Python 3.10 or higher
 - FFmpeg
-- Conda (Miniconda 또는 Anaconda)
+- Conda (Miniconda or Anaconda)
 
-### MAC OS 설치 가이드
+### MAC OS Installation Guide
 
-#### 1. Python 및 Conda 설치
+#### 1. Installing Python and Conda
 
-1. **Miniconda 설치**:
-   - [Miniconda 다운로드 페이지](https://docs.conda.io/en/latest/miniconda.html)에서 macOS용 설치 파일을 다운로드합니다.
-   - 다운로드한 `.pkg` 파일을 실행하고 설치 지침을 따릅니다.
-   - 설치가 완료되면 터미널을 열고 다음 명령어로 설치를 확인합니다:
+1. **Install Miniconda**:
+   - Download the macOS installer from the [Miniconda download page](https://docs.conda.io/en/latest/miniconda.html).
+   - Run the downloaded `.pkg` file and follow the installation instructions.
+   - After installation, open a terminal and verify the installation with:
      ```bash
      conda --version
      ```
 
-#### 2. FFmpeg 설치
+#### 2. Installing FFmpeg
 
-1. **Homebrew를 사용한 설치** (권장):
+1. **Installation using Homebrew** (recommended):
 
-   - Homebrew가 설치되어 있지 않다면 다음 명령어로 설치합니다:
+   - If you don't have Homebrew installed, install it with:
      ```bash
      /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
      ```
-   - FFmpeg 설치:
+   - Install FFmpeg:
      ```bash
      brew install ffmpeg
      ```
 
-2. **수동 설치**:
-   - [FFmpeg 다운로드 페이지](https://ffmpeg.org/download.html)에서 macOS용 바이너리를 다운로드합니다.
-   - 압축을 풀고 경로를 설정합니다.
+2. **Manual installation**:
+   - Download the macOS binary from the [FFmpeg download page](https://ffmpeg.org/download.html).
+   - Extract and set up the path.
 
-#### 3. 프로젝트 다운로드
+#### 3. Downloading the Project
 
-1. **Git을 사용한 다운로드** (권장):
+1. **Download using Git** (recommended):
 
    ```bash
    git clone https://github.com/yourusername/whisper-transcription.git
    cd whisper-transcription
    ```
 
-2. **ZIP 파일로 다운로드**:
-   - GitHub 페이지에서 'Code' 버튼을 클릭하고 'Download ZIP'을 선택합니다.
-   - 다운로드한 ZIP 파일을 압축 해제합니다.
-   - 터미널을 열고 압축 해제한 폴더로 이동합니다:
+2. **Download as ZIP file**:
+   - On the GitHub page, click the 'Code' button and select 'Download ZIP'.
+   - Extract the downloaded ZIP file.
+   - Open a terminal and navigate to the extracted folder:
      ```bash
-     cd 압축해제한_폴더_경로
+     cd path_to_extracted_folder
      ```
 
-#### 4. 가상 환경 설정 및 패키지 설치
+#### 4. Setting Up Virtual Environment and Installing Packages
 
-1. **가상 환경 생성 및 활성화**:
+1. **Create and activate a virtual environment**:
 
    ```bash
    conda create -n whisper-env python=3.10
    conda activate whisper-env
    ```
 
-2. **필요한 패키지 설치**:
+2. **Install required packages**:
 
    ```bash
    pip install openai-whisper flask python-dotenv librosa
    ```
 
-3. **화자 구분 기능을 위한 추가 패키지 설치** (선택사항):
+3. **Install additional packages for speaker differentiation** (optional):
    ```bash
    pip install pyannote.audio
    ```
 
-#### 5. 애플리케이션 실행
+#### 5. Running the Application
 
-1. **애플리케이션 시작**:
+1. **Start the application**:
 
    ```bash
    python app.py
    ```
 
-2. **웹 브라우저에서 접속**:
-   - 브라우저를 열고 `http://127.0.0.1:5000` 또는 `http://localhost:5000`으로 접속합니다.
+2. **Access in web browser**:
+   - Open your browser and go to `http://127.0.0.1:4824` or `http://localhost:4824`.
 
-### Windows 설치 가이드
+### Windows Installation Guide
 
-#### 1. Python 및 Conda 설치
+#### 1. Installing Python and Conda
 
-1. **Miniconda 설치**:
-   - [Miniconda 다운로드 페이지](https://docs.conda.io/en/latest/miniconda.html)에서 Windows용 설치 파일을 다운로드합니다.
-   - 다운로드한 `.exe` 파일을 실행하고 설치 지침을 따릅니다.
-   - "Add Miniconda3 to my PATH environment variable" 옵션을 체크하는 것이 좋습니다.
-   - 설치가 완료되면 Anaconda Prompt를 열고 다음 명령어로 설치를 확인합니다:
+1. **Install Miniconda**:
+   - Download the Windows installer from the [Miniconda download page](https://docs.conda.io/en/latest/miniconda.html).
+   - Run the downloaded `.exe` file and follow the installation instructions.
+   - It's recommended to check the "Add Miniconda3 to my PATH environment variable" option.
+   - After installation, open Anaconda Prompt and verify the installation with:
      ```bash
      conda --version
      ```
 
-#### 2. FFmpeg 설치
+#### 2. Installing FFmpeg
 
-1. **공식 사이트에서 다운로드**:
+1. **Download from the official site**:
 
-   - [FFmpeg 다운로드 페이지](https://ffmpeg.org/download.html)에서 Windows용 바이너리를 다운로드합니다.
-   - 다운로드한 파일을 압축 해제하고 내부의 `bin` 폴더를 기억해둡니다.
-   - 시스템 환경 변수 PATH에 FFmpeg `bin` 폴더 경로를 추가합니다:
-     - 제어판 > 시스템 > 고급 시스템 설정 > 환경 변수
-     - '시스템 변수' 섹션에서 'Path' 변수를 찾아 편집
-     - '새로 만들기'를 클릭하고 FFmpeg `bin` 폴더의 전체 경로를 추가
-     - 확인을 클릭하여 저장
+   - Download the Windows binary from the [FFmpeg download page](https://ffmpeg.org/download.html).
+   - Extract the downloaded file and note the location of the `bin` folder inside.
+   - Add the FFmpeg `bin` folder path to your system's PATH environment variable:
+     - Control Panel > System > Advanced System Settings > Environment Variables
+     - In the 'System variables' section, find the 'Path' variable and edit it
+     - Click 'New' and add the full path to the FFmpeg `bin` folder
+     - Click OK to save
 
-2. **Chocolatey를 사용한 설치** (대안):
-   - 관리자 권한으로 PowerShell을 실행합니다.
-   - Chocolatey가 설치되어 있지 않다면 다음 명령어로 설치합니다:
+2. **Installation using Chocolatey** (alternative):
+   - Run PowerShell as administrator.
+   - If you don't have Chocolatey installed, install it with:
      ```powershell
      Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
      ```
-   - FFmpeg 설치:
+   - Install FFmpeg:
      ```powershell
      choco install ffmpeg
      ```
 
-#### 3. 프로젝트 다운로드
+#### 3. Downloading the Project
 
-1. **Git을 사용한 다운로드**:
+1. **Download using Git**:
 
-   - [Git for Windows](https://gitforwindows.org/)를 설치합니다.
-   - Git Bash 또는 명령 프롬프트를 열고 다음 명령어를 실행합니다:
+   - Install [Git for Windows](https://gitforwindows.org/).
+   - Open Git Bash or Command Prompt and run:
      ```bash
      git clone https://github.com/yourusername/whisper-transcription.git
      cd whisper-transcription
      ```
 
-2. **ZIP 파일로 다운로드**:
-   - GitHub 페이지에서 'Code' 버튼을 클릭하고 'Download ZIP'을 선택합니다.
-   - 다운로드한 ZIP 파일을 원하는 위치에 압축 해제합니다.
-   - 명령 프롬프트를 열고 압축 해제한 폴더로 이동합니다:
+2. **Download as ZIP file**:
+   - On the GitHub page, click the 'Code' button and select 'Download ZIP'.
+   - Extract the downloaded ZIP file to your desired location.
+   - Open Command Prompt and navigate to the extracted folder:
      ```bash
-     cd 압축해제한_폴더_경로
+     cd path_to_extracted_folder
      ```
 
-#### 4. 가상 환경 설정 및 패키지 설치
+#### 4. Setting Up Virtual Environment and Installing Packages
 
-1. **가상 환경 생성 및 활성화**:
+1. **Create and activate a virtual environment**:
 
-   - Anaconda Prompt를 열고 다음 명령어를 실행합니다:
+   - Open Anaconda Prompt and run:
      ```bash
      conda create -n whisper-env python=3.10
      conda activate whisper-env
      ```
 
-2. **필요한 패키지 설치**:
+2. **Install required packages**:
 
    ```bash
    pip install openai-whisper flask python-dotenv librosa
    ```
 
-3. **화자 구분 기능을 위한 추가 패키지 설치** (선택사항):
+3. **Install additional packages for speaker differentiation** (optional):
    ```bash
    pip install pyannote.audio
    ```
 
-#### 5. 애플리케이션 실행
+#### 5. Running the Application
 
-1. **애플리케이션 시작**:
+1. **Start the application**:
 
-   - Anaconda Prompt에서 가상 환경이 활성화된 상태로 다음 명령어를 실행합니다:
+   - In Anaconda Prompt with the virtual environment activated, run:
      ```bash
      python app.py
      ```
 
-2. **웹 브라우저에서 접속**:
-   - 브라우저를 열고 `http://127.0.0.1:5000` 또는 `http://localhost:5000`으로 접속합니다.
+2. **Access in web browser**:
+   - Open your browser and go to `http://127.0.0.1:4824` or `http://localhost:4824`.
 
-### Linux 설치 가이드 (Ubuntu/Debian 기준)
+### Linux Installation Guide (Ubuntu/Debian based)
 
-#### 1. Python 및 Conda 설치
+#### 1. Installing Python and Conda
 
-1. **Miniconda 설치**:
+1. **Install Miniconda**:
 
    ```bash
-   # 설치 파일 다운로드
+   # Download the installer
    wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
 
-   # 실행 권한 부여
+   # Give execute permission
    chmod +x Miniconda3-latest-Linux-x86_64.sh
 
-   # 설치 실행
+   # Run the installer
    ./Miniconda3-latest-Linux-x86_64.sh
    ```
 
-   - 설치 중 라이선스 동의 및 설치 경로 확인 메시지가 나타납니다.
-   - 설치가 완료되면 터미널을 다시 열거나 다음 명령어로 환경을 업데이트합니다:
+   - During installation, you'll be prompted to accept the license and confirm the installation path.
+   - After installation, either restart your terminal or update your environment with:
      ```bash
      source ~/.bashrc
      ```
-   - 설치 확인:
+   - Verify the installation:
      ```bash
      conda --version
      ```
 
-#### 2. FFmpeg 설치
+#### 2. Installing FFmpeg
 
-1. **패키지 관리자를 사용한 설치**:
+1. **Installation using package manager**:
 
    ```bash
    sudo apt update
    sudo apt install ffmpeg
    ```
 
-2. **설치 확인**:
+2. **Verify installation**:
    ```bash
    ffmpeg -version
    ```
 
-#### 3. 프로젝트 다운로드
+#### 3. Downloading the Project
 
-1. **Git을 사용한 다운로드**:
+1. **Download using Git**:
 
    ```bash
-   # Git이 설치되어 있지 않다면 설치
+   # Install Git if not already installed
    sudo apt install git
 
-   # 프로젝트 클론
+   # Clone the project
    git clone https://github.com/yourusername/whisper-transcription.git
    cd whisper-transcription
    ```
 
-2. **ZIP 파일로 다운로드**:
+2. **Download as ZIP file**:
 
    ```bash
-   # 필요한 도구 설치
+   # Install necessary tools
    sudo apt install wget unzip
 
-   # ZIP 파일 다운로드 (GitHub URL 예시)
+   # Download the ZIP file (example GitHub URL)
    wget https://github.com/yourusername/whisper-transcription/archive/refs/heads/main.zip
 
-   # 압축 해제
+   # Extract
    unzip main.zip
 
-   # 폴더로 이동
+   # Navigate to the folder
    cd whisper-transcription-main
    ```
 
-#### 4. 가상 환경 설정 및 패키지 설치
+#### 4. Setting Up Virtual Environment and Installing Packages
 
-1. **가상 환경 생성 및 활성화**:
+1. **Create and activate a virtual environment**:
 
    ```bash
    conda create -n whisper-env python=3.10
    conda activate whisper-env
    ```
 
-2. **필요한 패키지 설치**:
+2. **Install required packages**:
 
    ```bash
    pip install openai-whisper flask python-dotenv librosa
    ```
 
-3. **화자 구분 기능을 위한 추가 패키지 설치** (선택사항):
+3. **Install additional packages for speaker differentiation** (optional):
    ```bash
    pip install pyannote.audio
    ```
 
-#### 5. 애플리케이션 실행
+#### 5. Running the Application
 
-1. **애플리케이션 시작**:
+1. **Start the application**:
 
    ```bash
    python app.py
    ```
 
-2. **웹 브라우저에서 접속**:
-   - 브라우저를 열고 `http://127.0.0.1:5000` 또는 `http://localhost:5000`으로 접속합니다.
+2. **Access in web browser**:
+   - Open your browser and go to `http://127.0.0.1:4824` or `http://localhost:4824`.
 
-## 사용 방법
+## How to Use
 
-1. 웹 브라우저에서 `http://localhost:5000` 접속
+1. Access `http://localhost:4824` in your web browser
 
-2. 음성 파일을 업로드하거나 드래그 앤 드롭
+2. Upload or drag and drop an audio file
 
-   - 지원 형식: MP3, WAV, OGG, M4A, FLAC
-   - 최대 파일 크기: 60MB
+   - Supported formats: MP3, WAV, OGG, M4A, FLAC
+   - Maximum file size: 60MB
 
-3. 필요에 따라 "화자 구분 활성화" 옵션 선택
+3. Select the "Enable Speaker Differentiation" option if needed
 
-   - 다중 화자가 있는 대화를 구분하려면 이 옵션을 선택하세요
+   - Choose this option to distinguish between multiple speakers in a conversation
 
-4. 변환 진행 상황 확인
+4. Check the conversion progress
 
-   - 진행 바와 상태 메시지로 처리 상황을 확인할 수 있습니다
+   - You can monitor the processing status with the progress bar and status messages
 
-5. 변환 결과 확인
+5. Review the conversion results
 
-   - 텍스트 결과가 화자별로 구분되어 표시됩니다
-   - 오디오 플레이어로 원본 오디오를 재생할 수 있습니다
-   - 오디오 재생 시 현재 위치에 해당하는 텍스트가 하이라이트됩니다
+   - Text results will be displayed with speaker differentiation
+   - You can play the original audio using the audio player
+   - During audio playback, the corresponding text will be highlighted
 
-6. 필요시 텍스트 복사 버튼을 사용하여 결과 복사
+6. Use the copy text button to copy the results if needed
 
-## 문제 해결
+## Troubleshooting
 
-### 일반적인 문제
+### Common Issues
 
-1. **"FFmpeg not found" 오류**
+1. **"FFmpeg not found" error**
 
-   - FFmpeg가 올바르게 설치되었는지 확인하세요
-   - 시스템 PATH에 FFmpeg가 추가되었는지 확인하세요
+   - Verify that FFmpeg is correctly installed
+   - Check that FFmpeg is added to your system PATH
 
-2. **"No module named 'whisper'" 오류**
+2. **"No module named 'whisper'" error**
 
-   - 가상 환경이 활성화되었는지 확인하세요
-   - `pip install openai-whisper` 명령으로 패키지를 다시 설치해보세요
+   - Ensure that your virtual environment is activated
+   - Try reinstalling the package with `pip install openai-whisper`
 
-3. **파일 업로드 오류**
+3. **File upload errors**
 
-   - 파일 형식이 지원되는지 확인하세요 (MP3, WAV, OGG, M4A, FLAC)
-   - 파일 크기가 60MB 이하인지 확인하세요
+   - Check that your file format is supported (MP3, WAV, OGG, M4A, FLAC)
+   - Ensure that your file size is under 60MB
 
-4. **처리 속도가 느린 경우**
-   - 대용량 파일은 처리 시간이 길어질 수 있습니다
-   - 컴퓨터 사양에 따라 처리 속도가 달라질 수 있습니다
-   - 더 작은 오디오 파일로 분할하여 처리해보세요
+4. **Slow processing speed**
+   - Large files may take longer to process
+   - Processing speed can vary depending on your computer specifications
+   - Try splitting into smaller audio files for processing
 
-### 운영체제별 문제
+### Operating System Specific Issues
 
 #### MAC OS
 
-1. **FFmpeg 설치 문제**
+1. **FFmpeg installation issues**
 
    ```bash
-   # Homebrew 업데이트 후 다시 시도
+   # Update Homebrew and try again
    brew update
    brew install ffmpeg
    ```
 
-2. **권한 문제**
+2. **Permission issues**
    ```bash
-   # 프로젝트 폴더에 쓰기 권한 부여
+   # Grant write permissions to the project folder
    chmod -R 755 whisper-transcription
    ```
 
 #### Windows
 
-1. **FFmpeg 경로 문제**
+1. **FFmpeg path issues**
 
-   - 시스템을 재부팅하여 환경 변수 변경사항을 적용하세요
-   - 명령 프롬프트에서 `ffmpeg -version`을 실행하여 설치를 확인하세요
+   - Restart your system to apply environment variable changes
+   - Run `ffmpeg -version` in Command Prompt to verify the installation
 
-2. **CUDA 관련 오류** (GPU 사용 시)
-   - 최신 NVIDIA 드라이버를 설치하세요
-   - CUDA 버전이 PyTorch와 호환되는지 확인하세요
+2. **CUDA related errors** (when using GPU)
+   - Install the latest NVIDIA drivers
+   - Check that your CUDA version is compatible with PyTorch
 
 #### Linux
 
-1. **라이브러리 의존성 문제**
+1. **Library dependency issues**
 
    ```bash
-   # 필요한 시스템 라이브러리 설치
+   # Install necessary system libraries
    sudo apt update
    sudo apt install libsndfile1 libasound2-dev portaudio19-dev
    ```
 
-2. **권한 문제**
+2. **Permission issues**
    ```bash
-   # 프로젝트 폴더에 쓰기 권한 부여
+   # Grant write permissions to the project folder
    chmod -R 755 whisper-transcription
    ```
 
-## 참고 자료
+## References
 
 - [OpenAI Whisper](https://github.com/openai/whisper)
 - [Flask](https://flask.palletsprojects.com/)

@@ -221,7 +221,7 @@ def get_session(session_id):
         
         # 세그먼트 정보 조회
         segments_result = conn.execute('''
-            SELECT start_time, end_time, text
+            SELECT id, start_time, end_time, text
             FROM segments
             WHERE session_id = ?
             ORDER BY start_time
@@ -230,9 +230,10 @@ def get_session(session_id):
         segments = []
         for row in segments_result:
             segments.append({
-                'start': row[0],
-                'end': row[1],
-                'text': row[2]
+                'id': row[0],
+                'start': row[1],
+                'end': row[2],
+                'text': row[3]
             })
         
         session['segments'] = segments
@@ -242,6 +243,64 @@ def get_session(session_id):
     except Exception as e:
         app.logger.error(f"Error getting session from database: {str(e)}")
         return None
+
+# 세션 삭제 함수
+def delete_session(session_id):
+    if not db_initialized:
+        app.logger.warning("Database not initialized. Cannot delete session.")
+        return False
+    
+    try:
+        conn = duckdb.connect(DB_PATH)
+        
+        # 세션 정보 조회 (삭제 전 파일 경로 확인)
+        session_result = conn.execute('''
+            SELECT filename, audio_path
+            FROM sessions
+            WHERE id = ?
+        ''', (session_id,)).fetchone()
+        
+        if not session_result:
+            conn.close()
+            return False
+        
+        # 세그먼트 삭제
+        conn.execute('''
+            DELETE FROM segments
+            WHERE session_id = ?
+        ''', (session_id,))
+        
+        # 세션 삭제
+        conn.execute('''
+            DELETE FROM sessions
+            WHERE id = ?
+        ''', (session_id,))
+        
+        conn.close()
+        
+        # 관련 파일 삭제
+        try:
+            filename = session_result[0]
+            audio_path = session_result[1]
+            
+            # 오디오 파일 삭제
+            if audio_path and os.path.exists(os.path.join('static/audio', audio_path)):
+                os.remove(os.path.join('static/audio', audio_path))
+                app.logger.info(f"Deleted audio file: {audio_path}")
+            
+            # 업로드된 원본 파일 삭제
+            if filename and os.path.exists(os.path.join(app.config['UPLOAD_FOLDER'], filename)):
+                os.remove(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                app.logger.info(f"Deleted uploaded file: {filename}")
+        except Exception as e:
+            app.logger.error(f"Error deleting files for session {session_id}: {str(e)}")
+            # 파일 삭제 실패는 세션 삭제 성공에 영향을 주지 않음
+        
+        app.logger.info(f"Session {session_id} deleted from database")
+        return True
+    except Exception as e:
+        app.logger.error(f"Error deleting session from database: {str(e)}")
+        return False
 
 # 대용량 파일 처리를 위한 최적화된 transcribe 함수
 def optimized_transcribe(model, audio_path, task_id, language='auto'):
@@ -581,5 +640,165 @@ def cleanup_old_tasks():
 def serve_audio(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
+# 세그먼트 업데이트 API 엔드포인트
+@app.route('/update_segment', methods=['POST'])
+def update_segment():
+    try:
+        # 요청 데이터 가져오기
+        data = request.json
+        app.logger.info(f"Received update request: {data}")
+        
+        segment_id = data.get('segment_id')
+        text = data.get('text')
+        session_id = data.get('session_id')
+        
+        app.logger.info(f"Updating segment: session_id={session_id}, segment_id={segment_id}, type={type(segment_id)}")
+        
+        # 데이터 검증
+        if not segment_id and segment_id != 0:
+            app.logger.warning("Missing segment_id")
+            return jsonify({'success': False, 'error': '세그먼트 ID가 누락되었습니다.'}), 400
+        
+        if not text:
+            app.logger.warning("Missing text")
+            return jsonify({'success': False, 'error': '텍스트가 누락되었습니다.'}), 400
+            
+        if not session_id:
+            app.logger.warning("Missing session_id")
+            return jsonify({'success': False, 'error': '세션 ID가 누락되었습니다.'}), 400
+        
+        # 세션 가져오기
+        session = get_session(session_id)
+        if not session:
+            app.logger.warning(f"Session not found: {session_id}")
+            return jsonify({'success': False, 'error': '세션을 찾을 수 없습니다.'}), 404
+        
+        app.logger.info(f"Session found: {session_id}, segments: {len(session['segments'])}")
+        
+        # 세그먼트 ID 처리
+        try:
+            # 문자열인 경우 숫자로 변환 시도
+            if isinstance(segment_id, str):
+                if segment_id.isdigit():
+                    segment_id = int(segment_id)
+        except Exception as e:
+            app.logger.warning(f"Error converting segment_id to int: {str(e)}")
+            # 변환 실패 시 원래 값 유지
+        
+        app.logger.info(f"Processed segment_id: {segment_id}, type: {type(segment_id)}")
+        
+        # 세그먼트 ID가 숫자인 경우 (자동 생성된 세그먼트 또는 인덱스)
+        if isinstance(segment_id, int) or (isinstance(segment_id, str) and segment_id.isdigit()):
+            index = int(segment_id) if isinstance(segment_id, str) else segment_id
+            app.logger.info(f"Numeric segment_id: {index}, segments length: {len(session['segments'])}")
+            
+            # 세그먼트 배열 범위 확인
+            if 0 <= index < len(session['segments']):
+                # 세그먼트 업데이트
+                session['segments'][index]['text'] = text
+                
+                # 전체 텍스트 업데이트
+                full_text = '\n'.join([segment['text'] for segment in session['segments']])
+                
+                # 데이터베이스 업데이트
+                conn = duckdb.connect(DB_PATH)
+                
+                # 세그먼트가 데이터베이스에 있는지 확인
+                if 'id' in session['segments'][index]:
+                    # 데이터베이스 세그먼트 업데이트
+                    segment_db_id = session['segments'][index]['id']
+                    app.logger.info(f"Updating database segment: {segment_db_id}")
+                    conn.execute('''
+                        UPDATE segments
+                        SET text = ?
+                        WHERE id = ?
+                    ''', (text, segment_db_id))
+                
+                # 세션 결과 업데이트
+                conn.execute('''
+                    UPDATE sessions
+                    SET result = ?
+                    WHERE id = ?
+                ''', (full_text, session_id))
+                conn.close()
+                
+                app.logger.info(f"Segment updated successfully: index={index}")
+                return jsonify({'success': True})
+            else:
+                app.logger.warning(f"Invalid segment index: {index}, max: {len(session['segments'])-1}")
+                return jsonify({'success': False, 'error': '유효하지 않은 세그먼트 인덱스입니다.'}), 400
+        else:
+            # 데이터베이스에서 세그먼트 업데이트
+            app.logger.info(f"Non-numeric segment_id: {segment_id}")
+            conn = duckdb.connect(DB_PATH)
+            
+            # 세그먼트 존재 여부 확인
+            segment_exists = conn.execute('''
+                SELECT COUNT(*) FROM segments
+                WHERE id = ?
+            ''', (segment_id,)).fetchone()[0]
+            
+            if not segment_exists:
+                app.logger.warning(f"Segment not found in database: {segment_id}")
+                conn.close()
+                return jsonify({'success': False, 'error': '세그먼트를 찾을 수 없습니다.'}), 404
+            
+            # 세그먼트 업데이트
+            conn.execute('''
+                UPDATE segments
+                SET text = ?
+                WHERE id = ?
+            ''', (text, segment_id))
+            
+            # 세션의 전체 텍스트 업데이트
+            segments_result = conn.execute('''
+                SELECT start_time, end_time, text
+                FROM segments
+                WHERE session_id = ?
+                ORDER BY start_time
+            ''', (session_id,)).fetchall()
+            
+            full_text = '\n'.join([row[2] for row in segments_result])
+            
+            conn.execute('''
+                UPDATE sessions
+                SET result = ?
+                WHERE id = ?
+            ''', (full_text, session_id))
+            
+            conn.close()
+            
+            app.logger.info(f"Database segment updated successfully: {segment_id}")
+            return jsonify({'success': True})
+    except Exception as e:
+        app.logger.error(f"Error updating segment: {str(e)}")
+        import traceback
+        app.logger.error(traceback.format_exc())
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+# 세션 삭제 API
+@app.route('/delete_session/<session_id>', methods=['DELETE'])
+def delete_session_api(session_id):
+    try:
+        # 세션 삭제
+        success = delete_session(session_id)
+        
+        if success:
+            return jsonify({
+                'success': True,
+                'message': _('세션이 성공적으로 삭제되었습니다.')
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': _('세션을 찾을 수 없거나 삭제할 수 없습니다.')
+            })
+    except Exception as e:
+        app.logger.error(f"Error in delete_session_api: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        })
+
 if __name__ == '__main__':
-    app.run(debug=True, port=5001) 
+    app.run(debug=True, port=4824) 
