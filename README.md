@@ -27,6 +27,44 @@ OpenAI의 Whisper 모델을 사용하여 음성 파일을 텍스트로 변환하
 - 오디오 재생과 텍스트 동기화 (하이라이트 및 자동 스크롤)
 - 다국어 UI 지원 (한국어, 일본어, 영어)
 
+### 설치 방법
+
+1. 저장소 클론
+
+```bash
+git clone https://github.com/yourusername/whisper.git
+cd whisper
+```
+
+2. 가상환경 생성 및 활성화
+
+```bash
+python -m venv whisper-env
+source whisper-env/bin/activate  # Windows: whisper-env\Scripts\activate
+```
+
+3. 의존성 설치
+
+```bash
+pip install -r requirements.txt
+```
+
+4. 애플리케이션 실행
+
+```bash
+python app.py
+```
+
+5. 웹 브라우저에서 접속
+
+```
+http://localhost:4824
+```
+
+### 라이선스
+
+이 프로젝트는 MIT 라이선스 하에 배포됩니다. 자세한 내용은 [LICENSE](LICENSE) 파일을 참조하세요.
+
 ---
 
 <a id="日本語"></a>
