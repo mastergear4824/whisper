@@ -33,11 +33,21 @@ SUPPORTED_LANGUAGES = {
 # 업로드 폴더가 없으면 생성
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
+# 데이터베이스 폴더 설정
+DB_FOLDER = 'data'
+os.makedirs(DB_FOLDER, exist_ok=True)
+
 # DuckDB 데이터베이스 초기화
-DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'whisper_sessions.db')
+DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), DB_FOLDER, 'whisper_sessions.db')
 
 def init_db():
     try:
+        # 데이터베이스 디렉토리 확인 및 생성
+        db_dir = os.path.dirname(DB_PATH)
+        if not os.path.exists(db_dir):
+            os.makedirs(db_dir, exist_ok=True)
+            app.logger.info(f"Created database directory: {db_dir}")
+        
         conn = duckdb.connect(DB_PATH)
         conn.execute('''
             CREATE TABLE IF NOT EXISTS sessions (
@@ -63,14 +73,19 @@ def init_db():
         ''')
         conn.close()
         app.logger.info(f"Database initialized at {DB_PATH}")
+        return True
     except Exception as e:
         app.logger.error(f"Error initializing database: {str(e)}")
+        return False
 
 # 데이터베이스 초기화 호출
 try:
-    init_db()
+    db_initialized = init_db()
+    if not db_initialized:
+        app.logger.warning("Failed to initialize database. Session history will not be available.")
 except Exception as e:
     app.logger.error(f"Failed to initialize database: {str(e)}")
+    db_initialized = False
 
 # Whisper 모델 로드 (처음 실행 시 모델을 다운로드할 수 있음)
 model = None
@@ -94,6 +109,10 @@ def load_model():
 
 # 세션 저장 함수
 def save_session(task_id, filename, original_filename, language, result, segments, audio_path):
+    if not db_initialized:
+        app.logger.warning("Database not initialized. Session will not be saved.")
+        return False
+    
     try:
         conn = duckdb.connect(DB_PATH)
         
@@ -119,6 +138,10 @@ def save_session(task_id, filename, original_filename, language, result, segment
 
 # 세션 목록 조회 함수
 def get_sessions(limit=10):
+    if not db_initialized:
+        app.logger.warning("Database not initialized. Cannot retrieve sessions.")
+        return []
+    
     try:
         conn = duckdb.connect(DB_PATH)
         result = conn.execute('''
@@ -146,6 +169,10 @@ def get_sessions(limit=10):
 
 # 세션 상세 조회 함수
 def get_session(session_id):
+    if not db_initialized:
+        app.logger.warning("Database not initialized. Cannot retrieve session.")
+        return None
+    
     try:
         conn = duckdb.connect(DB_PATH)
         
@@ -295,15 +322,18 @@ def process_audio_async(model, filepath, task_id, original_filename):
         # 세션 저장
         segments = processing_tasks[task_id].get("segments", [])
         try:
-            save_session(
-                task_id, 
-                audio_filename, 
-                original_filename,
-                language, 
-                result["text"], 
-                segments, 
-                audio_filename
-            )
+            if db_initialized:
+                save_session(
+                    task_id, 
+                    audio_filename, 
+                    original_filename,
+                    language, 
+                    result["text"], 
+                    segments, 
+                    audio_filename
+                )
+            else:
+                app.logger.warning(f"Database not initialized. Session {task_id} will not be saved.")
         except Exception as e:
             app.logger.error(f"Error saving session: {str(e)}")
     except Exception as e:
@@ -339,7 +369,7 @@ def handle_exception(e):
 def index():
     try:
         # 최근 세션 목록 조회
-        sessions = get_sessions(limit=5)
+        sessions = get_sessions(limit=5) if db_initialized else []
         return render_template('index.html', languages=SUPPORTED_LANGUAGES, sessions=sessions)
     except Exception as e:
         app.logger.error(f"Error in index route: {str(e)}")
@@ -411,17 +441,18 @@ def get_task_status(task_id):
     if task_id not in processing_tasks:
         # 데이터베이스에서 세션 조회
         try:
-            session = get_session(task_id)
-            if session:
-                return jsonify({
-                    'completed': True,
-                    'success': True,
-                    'transcription': session['result'],
-                    'status': '처리 완료',
-                    'progress': 100,
-                    'segments': session['segments'],
-                    'audio_path': session['audio_path']
-                })
+            if db_initialized:
+                session = get_session(task_id)
+                if session:
+                    return jsonify({
+                        'completed': True,
+                        'success': True,
+                        'transcription': session['result'],
+                        'status': '처리 완료',
+                        'progress': 100,
+                        'segments': session['segments'],
+                        'audio_path': session['audio_path']
+                    })
         except Exception as e:
             app.logger.error(f"Error retrieving session {task_id}: {str(e)}")
         
@@ -472,6 +503,9 @@ def get_task_status(task_id):
 @app.route('/session/<session_id>', methods=['GET'])
 def get_session_api(session_id):
     try:
+        if not db_initialized:
+            return jsonify({'error': '데이터베이스가 초기화되지 않았습니다'}), 500
+            
         session = get_session(session_id)
         if session:
             return jsonify({
@@ -487,6 +521,9 @@ def get_session_api(session_id):
 @app.route('/sessions', methods=['GET'])
 def get_sessions_api():
     try:
+        if not db_initialized:
+            return jsonify({'error': '데이터베이스가 초기화되지 않았습니다'}), 500
+            
         limit = request.args.get('limit', 10, type=int)
         sessions = get_sessions(limit=limit)
         return jsonify({

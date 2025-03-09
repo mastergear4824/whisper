@@ -34,6 +34,12 @@ instance/
 static/uploads/*
 !static/uploads/.gitkeep
 
+# Database
+*.db
+whisper_sessions.db
+data/*
+!data/.gitkeep
+
 # IDE
 .idea/
 .vscode/
