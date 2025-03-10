@@ -115,7 +115,7 @@ python app.py
 
 #### 6. 웹 브라우저에서 접속
 
-웹 브라우저를 열고 `http://localhost:5000`으로 접속하세요.
+웹 브라우저를 열고 `http://localhost:4824`으로 접속하세요.
 
 ### English
 
@@ -188,7 +188,7 @@ python app.py
 
 #### 6. Access in Web Browser
 
-Open your web browser and navigate to `http://localhost:5000`.
+Open your web browser and navigate to `http://localhost:4824`.
 
 ### 日本語
 
@@ -261,7 +261,7 @@ python app.py
 
 #### 6. ウェブブラウザでアクセス
 
-ウェブブラウザを開き、`http://localhost:5000`にアクセスしてください。
+ウェブブラウザを開き、`http://localhost:4824`にアクセスしてください。
 
 ## 사용 방법 (Usage Guide / 使用方法)
 
